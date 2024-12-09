@@ -27,27 +27,25 @@
         let currentFacingMode = 'environment'; // Тыльная камера по умолчанию 
  
         async function startCamera(facingMode) { 
-            try { 
-                if (currentStream) { 
-                    const tracks = currentStream.getTracks(); 
-                    tracks.forEach(track => track.stop()); 
+            if (currentStream) { 
+                const tracks = currentStream.getTracks(); 
+                tracks.forEach(track => track.stop()); 
+            } 
+
+            currentStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: facingMode, 
+                    width: {min: 640, ideal: 1920}, 
+                    height: {min: 480, ideal: 1080}, 
+                    aspectRatio: 4 / 3, 
+                    frameRate: {min: 20} 
                 } 
- 
-                currentStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: facingMode, 
-                        width: {min: 640, ideal: 1920}, 
-                        height: {min: 480, ideal: 1080}, 
-                        aspectRatio: 4 / 3, 
-                        frameRate: {min: 20} 
-                    } 
-                }); 
- 
-                video.srcObject = currentStream; 
- 
-                // Запускаем обновление кадра для превью 
-                updatePreview(); 
-            }
+            }); 
+
+            video.srcObject = currentStream; 
+
+            // Запускаем обновление кадра для превью 
+            updatePreview(); 
         } 
  
         function updatePreview() { 
