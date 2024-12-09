@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Камера с обработкой видео</title>
+    <title>Камера с улучшенным качеством фото</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/telegram-web-app/1.1.0/telegram-web-app.css" rel="stylesheet">
     <style>
         body {
@@ -16,13 +16,11 @@
             background-color: #000;
             font-family: 'Arial', sans-serif;
         }
-        video {
+        video, canvas {
             width: 100%;
             max-width: 400px;
             border: 1px solid black;
-        }
-        canvas {
-            display: none;
+            display: block; /* Отображение в блоке */
         }
         img {
             margin-top: 10px;
@@ -51,18 +49,17 @@
 <body>
     <h1 style="color: white;">Сфотографируйте что-то!</h1>
     <div style="position: relative;">
+        <canvas id="canvas"></canvas>
         <video id="video" autoplay playsinline muted></video>
         <button id="snap">📸</button> <!-- Кнопка сфотографировать -->
     </div>
-    <canvas id="canvas"></canvas>
     <img id="photo" alt="Сфотографированное изображение">
-    
+
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const photo = document.getElementById('photo');
         const snapButton = document.getElementById('snap');
-        const context = canvas.getContext('2d');
 
         let currentStream;
 
@@ -89,13 +86,13 @@
                 const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
                 const dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1);
 
-                const FPS = 30;
-
                 const processFrame = () => {
                     cap.read(src);
                     
-                    // Применение обработки (например, преобразование в серый цвет)
-                    cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+                    // Применение обработки (увеличение четкости)
+                    cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY); // Преобразуем в серый цвет
+                    cv.GaussianBlur(dst, dst, new cv.Size(5, 5), 0); // Размытие
+                    cv.Canny(dst, dst, 50, 100); // Применяем Canny для границ
                     cv.imshow('canvas', dst); // Показываем обработанное изображение на canvas
 
                     requestAnimationFrame(processFrame);
@@ -119,22 +116,13 @@
                 canvas.width = width;
                 canvas.height = height;
 
-                // Задержка для уменьшения тряски
                 setTimeout(() => {
+                    // Снимаем изображение после небольшой задержки
+                    const context = canvas.getContext('2d');
                     context.drawImage(video, 0, 0, width, height);
                     const imageData = canvas.toDataURL('image/png');
-                    
-                    // Обработка изображения с использованием OpenCV
-                    const img = new Image();
-                    img.onload = () => {
-                        const mat = cv.imread(img);
-                        cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY);
-                        cv.imshow('canvas', mat);
-                        photo.setAttribute('src', canvas.toDataURL('image/png')); // Устанавливаем итоговое изображение
-                        mat.delete(); // Освобождение памяти
-                    };
-                    img.src = imageData;
-                }, 300); // Задержка 300 мс
+                    photo.setAttribute('src', imageData); // Устанавливаем фото
+                }, 300); // Задержка 300 мс для минимизации тряски
             } else {
                 console.error("Не удалось получить размеры видео.");
                 alert("Не удается сделать снимок. Убедитесь, что камера работает.");
