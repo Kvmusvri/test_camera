@@ -30,20 +30,25 @@
         
         async function startCamera(facingMode) {
             try {
-                // Останавливаем текущее видео, если есть
-                if (currentStream) {
-                    const tracks = currentStream.getTracks();
-                    tracks.forEach(track => track.stop());
-                }
-
-                // Запрашиваем доступ к камере с заданным режимом
-                currentStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode }
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: {min: 640, ideal: 1280},
+                        height: {min: 480, ideal: 720},
+                        frameRate: {min: 30},
+                        advanced: [
+                            {width: 1920, height: 1280},
+                            {aspectRatio: 4/3},
+                            {frameRate: {min: 50}},
+                            {frameRate: {min: 40}}
+                        ]
+                    }
                 });
-                video.srcObject = currentStream;
-            } catch (err) {
-                console.error("Ошибка доступа к камере: ", err);
-                alert("Не удалось получить доступ к камере. Убедитесь, что камера подключена и разрешите доступ.");
+            }
+            catch (error) {
+                if (error.name != "OverconstrainedError") {
+                    throw error;
+                }
+                // Overconstrained. Try again with a different combination (no prompt was shown)
             }
         }
 
