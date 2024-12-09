@@ -47,7 +47,15 @@
                         frameRate: {min: 30, ideal: 60}
                     }
                 });
+                // MediaStreamTrack
+                const mediaStreamTrack = mediaStream.getVideoTracks()[0];
+                // ImageCapture
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                // For an unknown reason, adding this delay greatly increases image quality on iOS
+                this.imageCapture = new ImageCapture(mediaStreamTrack); 
+
                 video.srcObject = currentStream;
+                
             } catch (err) {
                 console.error("Ошибка доступа к камере: ", err);
                 alert("Не удалось получить доступ к камере. Убедитесь, что камера подключена и разрешите доступ.");
