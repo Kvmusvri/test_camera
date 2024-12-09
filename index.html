@@ -17,35 +17,32 @@
     <button id="snap">Сфотографировать</button>
     <canvas id="canvas"></canvas>
     <img id="photo" alt="Сфотографированное изображение">
-
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
         const photo = document.getElementById('photo');
-        const toggleButton = document.getElementById('toggle');
-        
+
         let currentStream;
         let currentFacingMode = 'environment'; // Тыльная камера по умолчанию
-        
+
         async function startCamera(facingMode) {
             try {
-                // Останавливаем текущее видео, если есть
                 if (currentStream) {
                     const tracks = currentStream.getTracks();
                     tracks.forEach(track => track.stop());
                 }
 
-                // Запрашиваем доступ к камере с заданным режимом
                 currentStream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: facingMode,
                         width: {min: 640, ideal: 1920},
                         height: {min: 480, ideal: 1080},
-                        aspectRatio: 16/9,
+                        aspectRatio: 16 / 9,
                         frameRate: {min: 30, ideal: 60}
                     }
                 });
+
                 video.srcObject = currentStream;
             } catch (err) {
                 console.error("Ошибка доступа к камере: ", err);
@@ -53,7 +50,29 @@
             }
         }
 
-        // Инициализация камеры
+        document.getElementById('snap').addEventListener('click', () => {
+            canvas.width = video.videoWidth; // Устанавливаем размер холста
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height); // Рисуем кадр с видео
+
+            // Получаем изображение и улучшаем его
+            let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+            let data = imgData.data;
+
+            // Применяем резкость и контрастность
+            for (let i = 0; i < data.length; i += 4) {
+                // Увеличение контрастности (можно настраивать коэффициенты)
+                data[i] = data[i] > 128 ? Math.min(data[i] + 30, 255) : Math.max(data[i] - 30, 0);
+                data[i + 1] = data[i + 1] > 128 ? Math.min(data[i + 1] + 30, 255) : Math.max(data[i + 1] - 30, 0);
+                data[i + 2] = data[i + 2] > 128 ? Math.min(data[i + 2] + 30, 255) : Math.max(data[i + 2] - 30, 0);
+            }
+
+            context.putImageData(imgData, 0, 0); // Рисуем улучшенное изображение
+
+            // Отображаем на экране
+            photo.src = canvas.toDataURL();
+        });
+
         startCamera(currentFacingMode);
     </script>
 </body>
