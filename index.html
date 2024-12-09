@@ -1,46 +1,12 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Камера Зайца</title>
-    <style>
-        body { display: flex; flex-direction: column; align-items: center; }
-        video { width: 100%; max-width: 400px; }
-        canvas { display: none; }
-        img { margin-top: 10px; max-width: 100%; }
-    </style>
-</head>
-<body>
-    <h1>Сфотографируйте что-то!</h1>
-    <video id="video" autoplay playsinline></video>
-    <button id="snap">Сфотографировать</button>
-    <canvas id="canvas"></canvas>
-    <img id="photo" alt="Сфотографированное изображение">
-
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const photo = document.getElementById('photo');
-
-        // Запрашиваем доступ к камере
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream;
-            })
-            .catch(err => {
-                console.error("Ошибка доступа к камере: ", err);
-            });
-
-        // Функция для захвата изображения
-        document.getElementById('snap').addEventListener('click', () => {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const dataURL = canvas.toDataURL('image/png');
-            photo.setAttribute('src', dataURL);
-        });
-    </script>
-</body>
-</html>
+<p>
+<label for="soundFile">Как звучит ваш голос?</label>
+<input type="file" id="soundFile" capture="user" accept="audio/*" />
+</p>
+<p>
+<label for="videoFile">Загрузить своё видео:</label>
+<input type="file" id="videoFile" capture="environment" accept="video/*" />
+</p>
+<p>
+<label for="imageFile">Загрузить своё фото:</label>
+<input type="file" id="imageFile" capture="user" accept="image/*" />
+</p>
