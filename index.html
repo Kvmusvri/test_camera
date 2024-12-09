@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Камера с улучшением качества изображений</title>
+    <title>Камера</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/telegram-web-app/1.1.0/telegram-web-app.css" rel="stylesheet">
     <style>
         body { 
@@ -42,10 +42,9 @@
     </style>
 </head>
 <body>
-    <h1 style="color: white;">Сфотографируйте что-то!</h1>
     <div style="position: relative;">
         <video id="video" autoplay playsinline muted></video>
-        <button id="snap">📸</button> <!-- Кнопка сфотографировать -->
+        <button id="snap"></button> <!-- Кнопка сфотографировать -->
     </div>
     <canvas id="canvas"></canvas>
     <img id="photo" alt="Сфотографированное изображение">
