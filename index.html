@@ -40,6 +40,7 @@
             outline: none; /* Убираем контур при фокусе */
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jimp/0.16.1/jimp.min.js"></script> <!-- Подключение библиотеки Jimp -->
 </head>
 <body>
     <div style="position: relative;">
@@ -49,11 +50,9 @@
     <canvas id="canvas"></canvas>
     <img id="photo" alt="Сфотографированное изображение">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/telegraph/1.0.0/telegraph.min.js"></script>
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
         const photo = document.getElementById('photo');
         const snapButton = document.getElementById('snap');
 
@@ -66,39 +65,44 @@
                     video: { facingMode: 'environment' }
                 });
                 video.srcObject = currentStream;
-
-                // Улучшение качества с помощью библиотеки
-                applyImageEnhancement();
             } catch (err) {
                 console.error("Ошибка доступа к камере:", err);
                 alert("Не удалось получить доступ к камере. Убедитесь, что камера подключена и разрешите доступ.");
             }
         }
 
-        function applyImageEnhancement() {
-            // Пример применения улучшения качества, замените это на вашу логику
-        }
-
         // Инициализация камеры
         startCamera();
 
         // Обработчик захвата изображения
-        snapButton.addEventListener('click', () => {
+        snapButton.addEventListener('click', async () => {
             const width = video.videoWidth;
             const height = video.videoHeight;
 
             if (width && height) {
                 canvas.width = width;
                 canvas.height = height;
+
+                // Задержка для уменьшения тряски
+                await new Promise(resolve => setTimeout(resolve, 300)); // Задержка 300 мс
+                const context = canvas.getContext('2d');
                 context.drawImage(video, 0, 0, width, height);
-                
-                // Применение улучшения изображений (например, с помощью библиотеки)
-                // Для примера лишь обрезка
-                context.drawImage(video, 0, 0, width, height);
-                
-                // Получаем изображение
-                const dataURL = canvas.toDataURL('image/png');
-                photo.setAttribute('src', dataURL);
+
+                // Получаем изображение в виде Data URL
+                const imageData = canvas.toDataURL('image/png');
+
+                // Обработка изображения с помощью Jimp
+                const image = await Jimp.read(imageData);
+                image
+                    .contrast(0.5)  // Увеличение контрастности
+                    .quality(100)   // Полное качество
+                    .getBase64(Jimp.MIME_PNG, (err, src) => {
+                        if (err) {
+                            console.error("Ошибка обработки изображения:", err);
+                            return;
+                        }
+                        photo.setAttribute('src', src); // Устанавливаем улучшенное изображение
+                    });
             } else {
                 console.error("Не удалось получить размеры видео.");
                 alert("Не удается сделать снимок. Убедитесь, что камера работает.");
