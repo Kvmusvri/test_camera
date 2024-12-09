@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Документы Камера</title>
+    <title>Камера</title>
     <style>
         body {
             display: flex;
@@ -34,7 +34,6 @@
     </style>
 </head>
 <body>
-    <h1 style="color: white;">Камера для документов</h1>
     <video id="video" autoplay playsinline muted></video>
     <button id="capture">Сделать снимок</button>
     <img id="photo" alt="Снимок" style="display:none; width:100%; max-width:600px;">
@@ -58,11 +57,8 @@
                 });
 
                 video.srcObject = stream;
-
-                // Инициализация ImageCapture
                 const track = stream.getVideoTracks()[0];
                 imageCapture = new ImageCapture(track);
-
             } catch (error) {
                 alert('Ошибка доступа к камере: ' + error.message);
             }
@@ -73,11 +69,11 @@
                 const imageBitmap = await imageCapture.grabFrame();
                 const blob = await imageBitmapToBlob(imageBitmap);
                 const reader = new FileReader();
-                
+
                 reader.onloadend = async () => {
                     const base64data = reader.result;
                     await uploadImage(base64data);
-                    photo.src = base64data;  // Отображаем загруженное изображение
+                    photo.src = base64data; 
                     photo.style.display = 'block';
                 };
                 reader.readAsDataURL(blob);
@@ -98,7 +94,7 @@
         }
 
         async function uploadImage(data) {
-            await fetch('http://localhost:5000/upload', {  // Убедитесь, что этот URL соответствует вашему серверу
+            await fetch('http://localhost:5000/upload', { // Убедитесь, что URL соответствует вашему серверу
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -117,7 +113,6 @@
             });
         }
 
-        // Запуск камеры
         initCamera();
     </script>
 </body>
