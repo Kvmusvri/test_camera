@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Документы Камера</title>
+    <title>Камера для документов</title>
     <style>
         body {
             display: flex;
@@ -43,38 +43,54 @@
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const captureBtn = document.getElementById('capture');
+
+        let imageCapture;
         let stream;
 
         async function initCamera() {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: {
-                        facingMode: 'environment',
-                        width: { ideal: 1920 },  // Высокое разрешение
-                        height: { ideal: 1080 }
+                        facingMode: 'environment', // Используем тыльную камеру
+                        width: 1280, // Запрашиваем высокое разрешение
+                        height: 720
                     }
                 });
+                
                 video.srcObject = stream;
+
+                // Инициализация ImageCapture
+                const track = stream.getVideoTracks()[0];
+                imageCapture = new ImageCapture(track);
+                
             } catch (error) {
                 alert('Ошибка доступа к камере: ' + error.message);
             }
         }
 
-        captureBtn.addEventListener('click', () => {
-            const ctx = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Подготовка для загрузки изображения
-            const imageData = canvas.toDataURL('image/png');
-
-            // Загрузка изображения на сервер
-            uploadImage(imageData);
+        captureBtn.addEventListener('click', async () => {
+            try {
+                // Захват изображения в высоком разрешении
+                const imageBitmap = await imageCapture.grabFrame();
+                
+                // Отображение на canvas для предосмотра
+                canvas.width = imageBitmap.width;
+                canvas.height = imageBitmap.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(imageBitmap, 0, 0);
+                
+                // Получаем изображение в формате base64
+                const imageData = canvas.toDataURL('image/png');
+                
+                // Загрузка изображения на сервер
+                uploadImage(imageData);
+            } catch (error) {
+                alert('Ошибка захвата изображения: ' + error.message);
+            }
         });
 
         function uploadImage(data) {
-            fetch('https://example.com/upload', {  // Замените на ваш URL
+            fetch('https://example.com/upload', { // Замените на ваш URL
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
