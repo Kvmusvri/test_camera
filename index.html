@@ -65,7 +65,7 @@
             // Улучшение контрастности (уменьшенная сила фильтра) 
             for (let i = 0; i < data.length; i += 4) { 
                 data[i] = clamp(data[i] + 10);      // Красный 
-                data[i + 1] = clamp(data[i + 1] + 10); // Зеленый 
+                data[i + 1] = clamp(data[i + 1] + 100); // Зеленый 
                 data[i + 2] = clamp(data[i + 2] + 10); // Синий 
             } 
  
