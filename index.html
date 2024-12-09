@@ -34,16 +34,13 @@
             cursor: pointer; 
             position: absolute; 
             bottom: 20px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
             left: 50%; /* Центрируем по горизонтали */
             transform: translateX(-50%);
         } 
         .gallery {
             position: absolute;
-            top: 10px;
-            left: 40%; /* Смещаем галерею чуть левее */
+            top: 70px; /* Смещение галереи выше кнопки */
+            left: 40%; /* Центрируем относительно страницы */
             transform: translateX(-50%);
             display: flex;
             flex-direction: row;
@@ -56,6 +53,35 @@
             margin: 0 5px;
             border: 2px solid black;
             border-radius: 5px;
+            cursor: pointer; /* Указатель при наведении */
+        }
+        /* Стиль для полноэкранного просмотра */
+        .fullscreen-view {
+            display: none;
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.8); 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 10; /* Выше всех остальных элементов */
+        }
+        .fullscreen-view img {
+            max-width: 90%; 
+            max-height: 90%;
+        }
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 11; /* Поверх полноэкранного изображения */
         }
     </style> 
 </head> 
@@ -65,12 +91,22 @@
     <button id="snap"></button> 
     <canvas id="canvas"></canvas> 
     <img id="photo" alt="Сфотографированное изображение" style="display:none;"> 
+
+    <!-- Полноэкранное изображение для просмотра -->
+    <div class="fullscreen-view" id="fullscreenView">
+        <button class="close-btn" id="closeBtn">Закрыть</button>
+        <img id="fullscreenImg" alt="Полноэкранное изображение">
+    </div>
+
     <script> 
         const video = document.getElementById('video'); 
         const canvas = document.getElementById('canvas'); 
         const context = canvas.getContext('2d'); 
         const photo = document.getElementById('photo'); 
         const gallery = document.getElementById('gallery'); 
+        const fullscreenView = document.getElementById('fullscreenView');
+        const fullscreenImg = document.getElementById('fullscreenImg');
+        const closeBtn = document.getElementById('closeBtn');
 
         let currentStream; 
 
@@ -111,12 +147,21 @@
             // Добавляем в галерею
             const newImg = document.createElement('img');
             newImg.src = photo.src;
+            newImg.addEventListener('click', () => {
+                fullscreenImg.src = newImg.src; // Устанавливаем src для полноэкранного просмотра
+                fullscreenView.style.display = 'flex'; // Показываем полноэкранный просмотр
+            });
             gallery.appendChild(newImg);
         }); 
 
         function clamp(value) { 
             return Math.max(0, Math.min(255, value)); // Ограничиваем значение от 0 до 255 
         } 
+
+        // Закрытие полноэкранного просмотра
+        closeBtn.addEventListener('click', () => {
+            fullscreenView.style.display = 'none'; // Скрываем полноэкранный просмотр
+        });
 
         startCamera('environment'); 
     </script> 
