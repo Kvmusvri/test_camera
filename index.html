@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Камера с автофокусировкой и улучшенным качеством фото</title>
+    <title>Камера для фотографирования документов</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/telegram-web-app/1.1.0/telegram-web-app.css" rel="stylesheet">
     <style>
         body {
@@ -20,7 +20,7 @@
             width: 100%;
             max-width: 400px;
             border: 1px solid black;
-            display: block; /* Отображение в блоке */
+            display: block;
         }
         img {
             margin-top: 10px;
@@ -37,21 +37,21 @@
             position: absolute;
             bottom: 20px;
             left: 50%;
-            transform: translateX(-50%); /* Центрирование кнопки */
+            transform: translateX(-50%);
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
         }
         button:focus {
-            outline: none; /* Убираем контур при фокусе */
+            outline: none;
         }
     </style>
     <script src="https://docs.opencv.org/4.x/opencv.js" async></script>
 </head>
 <body>
-    <h1 style="color: white;">Сфотографируйте что-то!</h1>
+    <h1 style="color: white;">Сфотографируйте документ</h1>
     <div style="position: relative;">
         <canvas id="canvas"></canvas>
         <video id="video" autoplay playsinline muted></video>
-        <button id="snap">📸</button> <!-- Кнопка сфотографировать -->
+        <button id="snap">📸</button>
     </div>
     <img id="photo" alt="Сфотографированное изображение">
 
@@ -76,10 +76,11 @@
                 // Включение автофокусировки, если поддерживается
                 const capabilities = track.getCapabilities();
                 if (capabilities.focusMode) {
-                    await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+                    await track.applyConstraints({
+                        advanced: [{ focusMode: 'continuous' }]
+                    });
                 }
 
-                // Запускаем обработку потока
                 processVideo();
             } catch (err) {
                 console.error("Ошибка доступа к камере:", err);
@@ -91,17 +92,16 @@
             if (cv.getBuildInformation) {
                 const cap = new cv.VideoCapture(video);
                 const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
-                const dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC3); // Для улучшения цвета
-                const blurred = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC3); // Для размытых изображений
+                const dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1); // Для получения изображения в градациях серого
 
                 const processFrame = () => {
                     cap.read(src);
                     
-                    // Применение обработок
-                    cv.cvtColor(src, dst, cv.COLOR_RGBA2RGB); // Преобразуем в RGB
-                    cv.GaussianBlur(dst, blurred, new cv.Size(5, 5), 0); // Размывание
-                    cv.addWeighted(dst, 1.5, blurred, -0.5, 0, dst); // Улучшение резкости изображения
-                    cv.imshow('canvas', dst); // Показываем обработанное изображение на canvas
+                    // Преобразуем цвет в оттенки серого для улучшения читаемости текста
+                    cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+                    cv.threshold(dst, dst, 150, 255, cv.THRESH_BINARY); // Применяем бинаризацию для улучшения контрастности
+
+                    cv.imshow('canvas', dst); // Отображаем обработанное изображение
 
                     requestAnimationFrame(processFrame);
                 };
@@ -115,7 +115,7 @@
         // Инициализация камеры
         startCamera();
 
-        // Обработчик захвата изображения
+        // Обработчик нажатия кнопки захвата изображения
         snapButton.addEventListener('click', () => {
             const width = video.videoWidth;
             const height = video.videoHeight;
