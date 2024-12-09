@@ -1,85 +1,90 @@
 <!DOCTYPE html>
-<html lang="ru">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Веб-камера</title>
+    <title>Video Stream Capture</title>
     <style>
-        body { display: flex; flex-direction: column; align-items: center; margin: 0; }
-        video { width: 100%; max-width: 400px; border: 1px solid black; }
-        canvas { display: none; }
-        img { margin-top: 10px; max-width: 100%; border: 1px solid black; }
-        button { margin-top: 10px; }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        video {
+            width: 100%;
+            max-width: 600px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+        canvas {
+            display: none;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        img {
+            margin-top: 20px;
+            max-width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
     </style>
 </head>
-
 <body>
-    <video id="video" autoplay playsinline muted></video>
-    <button id="snap">Сфотографировать</button>
+    <h1>Stream Video and Capture Photo</h1>
+    <video id="video" autoplay></video>
+    <button id="capture-btn">Capture Photo</button>
     <canvas id="canvas"></canvas>
-    <img id="photo" alt="Сфотографированное изображение">
+    <img id="photo" alt="Captured photo will appear here">
 
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
         const photo = document.getElementById('photo');
-        let currentStream;
-        let currentFacingMode = 'environment'; // Тыльная камера по умолчанию
+        const captureBtn = document.getElementById('capture-btn');
 
-        async function startCamera(facingMode) {
+        // Access the user's camera
+        async function startVideoStream() {
             try {
-                if (currentStream) {
-                    const tracks = currentStream.getTracks();
-                    tracks.forEach(track => track.stop());
-                }
-
-                currentStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode }
-                });
-
-                video.srcObject = currentStream;
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+                video.srcObject = stream;
             } catch (err) {
-                console.error("Ошибка доступа к камере: ", err);
-                alert("Не удалось получить доступ к камере. Убедитесь, что камера подключена и разрешите доступ.");
+                console.error('Error accessing camera: ', err);
+                alert('Unable to access the camera. Please check your permissions.');
             }
         }
 
-        // Обработка изображения
-        function processImage() {
-            // Устанавливаем размеры canvas
+        // Capture photo from video stream
+        function capturePhoto() {
+            const context = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-
-            // Рисуем текущее изображение из видео на canvas
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Применяем улучшение качества
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-
-            // Улучшение контрастности
-            for (let i = 0; i < data.length; i += 4) {
-                // Применение формулы для яркости
-                data[i] = data[i] + 50;    // R
-                data[i + 1] = data[i + 1] + 50; // G
-                data[i + 2] = data[i + 2] + 50; // B
-            }
-
-            // Сохраняем измененные данные обратно на canvas
-            context.putImageData(imageData, 0, 0);
-
-            // Обновляем изображение
-            photo.src = canvas.toDataURL('image/png');
+            const imageData = canvas.toDataURL('image/png');
+            photo.src = imageData;
         }
 
-        // Обработчик события нажатия кнопки
-        document.getElementById('snap').addEventListener('click', processImage);
+        // Start the video stream when the page loads
+        window.addEventListener('load', startVideoStream);
 
-        // Инициализация камеры
-        startCamera(currentFacingMode);
+        // Add event listener to the capture button
+        captureBtn.addEventListener('click', capturePhoto);
     </script>
 </body>
-
 </html>
