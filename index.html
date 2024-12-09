@@ -3,44 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Веб-камера с фильтрами</title>
+    <title>Камера с фокусировкой и ISO</title>
     <style>
-        body { display: flex; flex-direction: column; align-items: center; margin: 0; }
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #000; }
         video { 
             width: 100%; 
             max-width: 400px; 
             border: 1px solid black; 
-            filter: contrast(1); /* Фильтр контрастности */
         }
         canvas { display: none; }
         img { margin-top: 10px; max-width: 100%; border: 1px solid black; }
         button { 
-            background: rgba(255, 255, 255, 0.5); /* Прозрачный фон для кнопки */
+            background: rgba(255, 255, 255, 0.7); 
             border-radius: 50%; 
             border: none; 
-            width: 70px; 
-            height: 70px; 
+            width: 80px; 
+            height: 80px; 
             cursor: pointer; 
-            position: absolute; /* Для размещения поверх видео */
+            position: absolute; 
             bottom: 20px; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
         }
-        #contrast-range {
+        input[type="range"] {
+            width: 100%;
+            max-width: 400px;
             margin-top: 10px;
-        }
-        #toggle {
-            margin-top: 10px;
+            display: block;
         }
     </style>
 </head>
 <body>
-    <h1>Сфотографируйте что-то!</h1>
+    <h1 style="color: white;">Сфотографируйте что-то!</h1>
     <div style="position: relative;">
         <video id="video" autoplay playsinline muted></video>
-        <button id="snap">📸</button> <!-- Используя emoji для кнопки -->
+        <button id="snap"></button> <!-- Кнопка сфотографировать -->
     </div>
-    <input type="range" id="contrast-range" min="0" max="3" step="0.1" value="1" />
-    <button id="toggle">Переключить камеру</button>
+    <input type="range" id="focus-range" min="0" max="100" value="50" step="1" />
+    <input type="range" id="iso-range" min="100" max="800" value="400" step="100" />
     <canvas id="canvas"></canvas>
     <img id="photo" alt="Сфотографированное изображение">
 
@@ -49,42 +48,51 @@
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
         const photo = document.getElementById('photo');
-        const toggleButton = document.getElementById('toggle');
-        const contrastRange = document.getElementById('contrast-range');
-        
+        const snapButton = document.getElementById('snap');
+        const focusRange = document.getElementById('focus-range');
+        const isoRange = document.getElementById('iso-range');
+
         let currentStream;
-        let currentFacingMode = 'environment'; // Тыльная камера по умолчанию
+        let track;
 
-        async function startCamera(facingMode) {
+        async function startCamera() {
             try {
-                // Останавливаем текущее видео, если есть
-                if (currentStream) {
-                    const tracks = currentStream.getTracks();
-                    tracks.forEach(track => track.stop());
-                }
-
-                // Запрашиваем доступ к камере с заданным режимом
+                // Запрашиваем доступ к камере с тыльной камерой
                 currentStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode }
+                    video: { facingMode: 'environment' }
                 });
                 video.srcObject = currentStream;
+                track = currentStream.getVideoTracks()[0];
+                
+                // Устанавливаем начальные значения фокуса и ISO
+                setManualFocus(50);
+                setISO(400);
             } catch (err) {
                 console.error("Ошибка доступа к камере:", err);
                 alert("Не удалось получить доступ к камере. Убедитесь, что камера подключена и разрешите доступ.");
             }
         }
 
-        // Инициализация камеры
-        startCamera(currentFacingMode);
+        // Установка фокуса
+        function setManualFocus(value) {
+            const focusValue = value / 100; // Нормализуем значение (0-1)
+            track.applyConstraints({
+                advanced: [{ focusMode: 'manual', focusDistance: focusValue }]
+            });
+        }
 
-        // Обработчик переключения камер
-        toggleButton.addEventListener('click', () => {
-            currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
-            startCamera(currentFacingMode);
-        });
+        // Установка ISO (если поддерживается)
+        function setISO(value) {
+            track.applyConstraints({
+                advanced: [{ iso: value }]
+            });
+        }
+
+        // Инициализация камеры
+        startCamera();
 
         // Обработчик захвата изображения
-        document.getElementById('snap').addEventListener('click', () => {
+        snapButton.addEventListener('click', () => {
             const width = video.videoWidth;
             const height = video.videoHeight;
 
@@ -100,11 +108,16 @@
             }
         });
 
-        // Изменение контрастности в реальном времени
-        contrastRange.addEventListener('input', () => {
-            const contrastValue = contrastRange.value;
-            video.style.filter = `contrast(${contrastValue})`; // Применение фильтра контрастности
+        // Регулировка фокуса
+        focusRange.addEventListener('input', () => {
+            setManualFocus(focusRange.value);
         });
+
+        // Регулировка ISO
+        isoRange.addEventListener('input', () => {
+            setISO(isoRange.value);
+        });
+
     </script>
 </body>
 </html>
