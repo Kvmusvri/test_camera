@@ -19,10 +19,14 @@
             width: 80%;
             max-width: 720px;
         }
+        video {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
+<video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
 
 <script>
@@ -30,13 +34,12 @@
         try {
             const constraints = {
                 video: {
-                    facingMode: "environment"
+                    facingMode: "user"
                 }
             };
 
             const currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-            const videoElement = document.createElement('video');
-            videoElement.autoplay = true;
+            const videoElement = document.getElementById('video');
             videoElement.srcObject = currentStream;
 
             // Установка canvas
