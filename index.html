@@ -1,41 +1,48 @@
-<!DOCTYPE html> 
-<html lang="ru"> 
-<head> 
-    <meta charset="UTF-8"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Веб-камера с переключением</title> 
-    <style> 
-        body { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            margin: 0; 
-            position: relative; 
-            height: 100vh; 
-            overflow: hidden; 
-        } 
-        video { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover;  
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-        } 
-        canvas { display: none; } 
-        button { 
-            border: none; 
-            border-radius: 50%; 
-            width: 70px; 
-            height: 70px; 
-            background-color: rgba(255, 255, 255, 0.3); 
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
-            cursor: pointer; 
-            position: absolute; 
-            bottom: 20px; 
-            left: 50%; 
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Веб-камера с переключением</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        canvas {
+            display: none;
+        }
+
+        button {
+            border: none;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            background-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
             transform: translateX(-50%);
-        } 
+        }
+
         .gallery {
             position: absolute;
             top: 10px; /* Уменьшено смещение галереи */
@@ -45,37 +52,41 @@
             flex-direction: row;
             overflow-x: auto; /* Прокрутка по оси X */
             white-space: nowrap; /* Не переносить элементы */
-            z-index: 1; 
+            z-index: 1;
             padding: 10px 0; /* Отступ по вертикали */
             max-width: 90%; /* Ограничиваем максимальную ширину галереи */
-            background-color: rgba(255, 255, 255, 0.8); /* Фоновый цвет для галереи */
+            background-color: rgba(255, 255, 255, 0.5); /* Прозрачный фон для галереи */
             border-radius: 10px; /* Скругление углов */
         }
+
         .gallery img {
             width: 80px; /* Уменьшенная ширина изображений */
             height: auto;
-            margin: 0 5px; 
+            margin: 0 5px;
             border: 2px solid black;
             border-radius: 5px;
-            cursor: pointer; 
+            cursor: pointer;
         }
+
         /* Стиль для полноэкранного просмотра */
         .fullscreen-view {
             display: none;
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(0, 0, 0, 0.8); 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 10; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
         }
+
         .fullscreen-view img {
-            max-width: 90%; 
+            max-width: 90%;
             max-height: 90%;
         }
+
         .close-btn {
             position: absolute;
             top: 20px;
@@ -85,86 +96,88 @@
             padding: 10px;
             border-radius: 5px;
             cursor: pointer;
-            z-index: 11; 
+            z-index: 11;
         }
-    </style> 
-</head> 
-<body> 
-    <video id="video" autoplay playsinline muted></video> 
+    </style>
+</head>
+
+<body>
+    <video id="video" autoplay playsinline muted></video>
     <div class="gallery" id="gallery"></div>
-    <button id="snap"></button> 
-    <canvas id="canvas"></canvas> 
-    <img id="photo" alt="Сфотографированное изображение" style="display:none;"> 
+    <button id="snap"></button>
+    <canvas id="canvas"></canvas>
+    <img id="photo" alt="Сфотографированное изображение" style="display:none;">
 
     <div class="fullscreen-view" id="fullscreenView">
         <button class="close-btn" id="closeBtn">Закрыть</button>
         <img id="fullscreenImg" alt="Полноэкранное изображение">
     </div>
 
-    <script> 
-        const video = document.getElementById('video'); 
-        const canvas = document.getElementById('canvas'); 
-        const context = canvas.getContext('2d'); 
-        const photo = document.getElementById('photo'); 
-        const gallery = document.getElementById('gallery'); 
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const photo = document.getElementById('photo');
+        const gallery = document.getElementById('gallery');
         const fullscreenView = document.getElementById('fullscreenView');
         const fullscreenImg = document.getElementById('fullscreenImg');
         const closeBtn = document.getElementById('closeBtn');
 
-        let currentStream; 
+        let currentStream;
 
-        async function startCamera(facingMode) { 
-            if (currentStream) { 
-                const tracks = currentStream.getTracks(); 
-                tracks.forEach(track => track.stop()); 
-            } 
-            currentStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: facingMode, 
-                    width: {min: 640, ideal: 1920}, 
-                    height: {min: 480, ideal: 1080}, 
-                    aspectRatio: 4 / 3, 
-                    frameRate: {min: 20} 
-                } 
-            }); 
-            video.srcObject = currentStream; 
-        } 
+        async function startCamera(facingMode) {
+            if (currentStream) {
+                const tracks = currentStream.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+            currentStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: facingMode,
+                    width: { min: 640, ideal: 1920 },
+                    height: { min: 480, ideal: 1080 },
+                    aspectRatio: 4 / 3,
+                    frameRate: { min: 20 }
+                }
+            });
+            video.srcObject = currentStream;
+        }
 
-        document.getElementById('snap').addEventListener('click', () => { 
-            canvas.width = video.videoWidth; 
-            canvas.height = video.videoHeight; 
-            context.drawImage(video, 0, 0, canvas.width, canvas.height); 
+        document.getElementById('snap').addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            let imgData = context.getImageData(0, 0, canvas.width, canvas.height); 
-            let data = imgData.data; 
+            let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+            let data = imgData.data;
 
             for (let i = 0; i < data.length; i += 4) {
                 data[i] = clamp(data[i] + 5); // Красный
                 data[i + 1] = clamp(data[i + 1] + 5); // Зеленый 
                 data[i + 2] = clamp(data[i + 2] + 5); // Синий 
-            } 
+            }
 
-            context.putImageData(imgData, 0, 0); 
-            photo.src = canvas.toDataURL(); 
+            context.putImageData(imgData, 0, 0);
+            photo.src = canvas.toDataURL();
 
             const newImg = document.createElement('img');
             newImg.src = photo.src;
             newImg.addEventListener('click', () => {
-                fullscreenImg.src = newImg.src; 
-                fullscreenView.style.display = 'flex'; 
+                fullscreenImg.src = newImg.src;
+                fullscreenView.style.display = 'flex';
             });
             gallery.appendChild(newImg);
-        }); 
-
-        function clamp(value) { 
-            return Math.max(0, Math.min(255, value)); 
-        } 
-
-        closeBtn.addEventListener('click', () => {
-            fullscreenView.style.display = 'none'; 
         });
 
-        startCamera('environment'); 
-    </script> 
-</body> 
+        function clamp(value) {
+            return Math.max(0, Math.min(255, value));
+        }
+
+        closeBtn.addEventListener('click', () => {
+            fullscreenView.style.display = 'none';
+        });
+
+        startCamera('environment');
+    </script>
+</body>
+
 </html>
