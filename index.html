@@ -45,10 +45,7 @@
             });
             
             const videoElement = document.getElementById('video');
-            video.srcObject = await navigator.mediaDevices.getUserMedia({
-                video: true
-            });
-            await new Promise(resolve => video.onloadedmetadata = resolve);
+            videoElement.srcObject = currentStream;
             
         } catch (error) {
             console.error('Ошибка при получении видеопотока:', error);
