@@ -43,17 +43,21 @@
             transform: translateX(-50%);
             display: flex;
             flex-direction: row;
-            overflow-x: auto; /* Позволяет пролистывание */
-            white-space: nowrap; /* Элементы не переходят на новую строку */
-            z-index: 1; /* Делаем галерею над видео */
+            overflow-x: auto; /* Прокрутка по оси X */
+            white-space: nowrap; /* Не переносить элементы */
+            z-index: 1; 
             padding: 10px 0; /* Отступ по вертикали */
+            max-width: 90%; /* Ограничиваем максимальную ширину галереи */
+            background-color: rgba(255, 255, 255, 0.8); /* Фоновый цвет для галереи */
+            border-radius: 10px; /* Скругление углов */
         }
         .gallery img {
             width: 80px; /* Уменьшенная ширина изображений */
-            margin: 0 5px; /* Увеличено пространство между изображениями */
+            height: auto;
+            margin: 0 5px; 
             border: 2px solid black;
             border-radius: 5px;
-            cursor: pointer; /* Указатель при наведении */
+            cursor: pointer; 
         }
         /* Стиль для полноэкранного просмотра */
         .fullscreen-view {
