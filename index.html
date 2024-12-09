@@ -3,36 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Камера</title>
+    <title>Камера с обработкой видео</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/telegram-web-app/1.1.0/telegram-web-app.css" rel="stylesheet">
     <style>
-        body { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-            background-color: #000; 
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
             font-family: 'Arial', sans-serif;
         }
-        video { 
-            width: 100%; 
-            max-width: 400px; 
-            border: 1px solid black; 
+        video {
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid black;
         }
-        canvas { display: none; }
-        img { margin-top: 10px; max-width: 100%; border: 1px solid black; }
-        button { 
-            background: rgba(255, 255, 255, 0.7); 
-            border-radius: 50%; 
-            border: none; 
-            width: 80px; 
-            height: 80px; 
-            cursor: pointer; 
-            position: absolute; 
-            bottom: 20px; 
-            left: 50%; 
+        canvas {
+            display: none;
+        }
+        img {
+            margin-top: 10px;
+            max-width: 100%;
+            border: 1px solid black;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            border: none;
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
             transform: translateX(-50%); /* Центрирование кнопки */
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
         }
@@ -40,21 +46,23 @@
             outline: none; /* Убираем контур при фокусе */
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jimp/0.16.1/jimp.min.js"></script> <!-- Подключение библиотеки Jimp -->
+    <script src="https://docs.opencv.org/4.x/opencv.js" async></script>
 </head>
 <body>
+    <h1 style="color: white;">Сфотографируйте что-то!</h1>
     <div style="position: relative;">
         <video id="video" autoplay playsinline muted></video>
-        <button id="snap"></button> <!-- Кнопка сфотографировать -->
+        <button id="snap">📸</button> <!-- Кнопка сфотографировать -->
     </div>
     <canvas id="canvas"></canvas>
     <img id="photo" alt="Сфотографированное изображение">
-
+    
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const photo = document.getElementById('photo');
         const snapButton = document.getElementById('snap');
+        const context = canvas.getContext('2d');
 
         let currentStream;
 
@@ -65,9 +73,37 @@
                     video: { facingMode: 'environment' }
                 });
                 video.srcObject = currentStream;
+
+                // Запускаем обработку потока
+                processVideo();
             } catch (err) {
                 console.error("Ошибка доступа к камере:", err);
                 alert("Не удалось получить доступ к камере. Убедитесь, что камера подключена и разрешите доступ.");
+            }
+        }
+
+        function processVideo() {
+            // Используем OpenCV для обработки
+            if (cv.getBuildInformation) {
+                const cap = new cv.VideoCapture(video);
+                const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+                const dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1);
+
+                const FPS = 30;
+
+                const processFrame = () => {
+                    cap.read(src);
+                    
+                    // Применение обработки (например, преобразование в серый цвет)
+                    cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+                    cv.imshow('canvas', dst); // Показываем обработанное изображение на canvas
+
+                    requestAnimationFrame(processFrame);
+                };
+
+                requestAnimationFrame(processFrame);
+            } else {
+                console.error("OpenCV не загружен.");
             }
         }
 
@@ -75,7 +111,7 @@
         startCamera();
 
         // Обработчик захвата изображения
-        snapButton.addEventListener('click', async () => {
+        snapButton.addEventListener('click', () => {
             const width = video.videoWidth;
             const height = video.videoHeight;
 
@@ -84,25 +120,21 @@
                 canvas.height = height;
 
                 // Задержка для уменьшения тряски
-                await new Promise(resolve => setTimeout(resolve, 300)); // Задержка 300 мс
-                const context = canvas.getContext('2d');
-                context.drawImage(video, 0, 0, width, height);
-
-                // Получаем изображение в виде Data URL
-                const imageData = canvas.toDataURL('image/png');
-
-                // Обработка изображения с помощью Jimp
-                const image = await Jimp.read(imageData);
-                image
-                    .contrast(0.5)  // Увеличение контрастности
-                    .quality(100)   // Полное качество
-                    .getBase64(Jimp.MIME_PNG, (err, src) => {
-                        if (err) {
-                            console.error("Ошибка обработки изображения:", err);
-                            return;
-                        }
-                        photo.setAttribute('src', src); // Устанавливаем улучшенное изображение
-                    });
+                setTimeout(() => {
+                    context.drawImage(video, 0, 0, width, height);
+                    const imageData = canvas.toDataURL('image/png');
+                    
+                    // Обработка изображения с использованием OpenCV
+                    const img = new Image();
+                    img.onload = () => {
+                        const mat = cv.imread(img);
+                        cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY);
+                        cv.imshow('canvas', mat);
+                        photo.setAttribute('src', canvas.toDataURL('image/png')); // Устанавливаем итоговое изображение
+                        mat.delete(); // Освобождение памяти
+                    };
+                    img.src = imageData;
+                }, 300); // Задержка 300 мс
             } else {
                 console.error("Не удалось получить размеры видео.");
                 alert("Не удается сделать снимок. Убедитесь, что камера работает.");
