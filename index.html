@@ -25,17 +25,18 @@
         const context = canvas.getContext('2d');
         const photo = document.getElementById('photo');
 
-        // Запрашиваем доступ к камере
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 video.srcObject = stream;
-            })
-            .catch(err => {
+            } catch (err) {
                 console.error("Ошибка доступа к камере: ", err);
-                alert("Не удалось получить доступ к камере. Убедитесь, что она подключена и разрешена.");
-            });
+                alert("Не удалось получить доступ к камере. Убедитесь в ее подключении и разрешите доступ.");
+            }
+        }
 
-        // Функция для захвата изображения
+        startCamera();
+
         document.getElementById('snap').addEventListener('click', () => {
             const width = video.videoWidth;
             const height = video.videoHeight;
