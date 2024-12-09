@@ -13,6 +13,7 @@
     </style>
 </head>
 <body>
+    <h1>Сфотографируйте что-то!</h1>
     <video id="video" autoplay playsinline muted></video>
     <button id="snap">Сфотографировать</button>
     <canvas id="canvas"></canvas>
@@ -37,13 +38,9 @@
                 }
 
                 // Запрашиваем доступ к камере с заданным режимом
-                const stream = await navigator.mediaDevices.getUserMedia({
+                currentStream = await navigator.mediaDevices.getUserMedia({
                     video: {
-                        facingMode: facingMode,
-                        width: {min: 640, ideal: 1280},
-                        height: {min: 480, ideal: 720},
-                        aspectRatio: 3/2,
-                        frameRate: {min: 20}
+                        facingMode: facingMode 
                     }
                 });
                 video.srcObject = currentStream;
@@ -55,6 +52,7 @@
 
         // Инициализация камеры
         startCamera(currentFacingMode);
+
     </script>
 </body>
 </html>
