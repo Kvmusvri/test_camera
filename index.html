@@ -17,7 +17,7 @@
         video { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover;  /* covers the video area */
+            object-fit: cover;  
             position: absolute; 
             top: 0; 
             left: 0; 
@@ -28,28 +28,29 @@
             border-radius: 50%; 
             width: 70px; 
             height: 70px; 
-            background-color: rgba(255, 255, 255, 0.3); /* еле прозрачный фон */ 
+            background-color: rgba(255, 255, 255, 0.3); 
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
             cursor: pointer; 
             position: absolute; 
             bottom: 20px; 
-            left: 50%; /* Центрируем по горизонтали */
+            left: 50%; 
             transform: translateX(-50%);
         } 
         .gallery {
             position: absolute;
-            top: 70px; /* Смещение галереи выше кнопки */
-            left: 40%; /* Центрируем относительно страницы */
+            top: 10px; /* Уменьшено смещение галереи */
+            left: 50%; /* Центрируем */
             transform: translateX(-50%);
             display: flex;
             flex-direction: row;
-            overflow-x: auto;
+            overflow-x: auto; /* Позволяет пролистывание */
+            white-space: nowrap; /* Элементы не переходят на новую строку */
             z-index: 1; /* Делаем галерею над видео */
+            padding: 10px 0; /* Отступ по вертикали */
         }
         .gallery img {
-            width: 150px; /* Ширина изображений увеличена */
-            height: auto;
-            margin: 0 10px; /* Увеличено пространство между изображениями */
+            width: 80px; /* Уменьшенная ширина изображений */
+            margin: 0 5px; /* Увеличено пространство между изображениями */
             border: 2px solid black;
             border-radius: 5px;
             cursor: pointer; /* Указатель при наведении */
@@ -65,7 +66,7 @@
             background-color: rgba(0, 0, 0, 0.8); 
             align-items: center; 
             justify-content: center; 
-            z-index: 10; /* Выше всех остальных элементов */
+            z-index: 10; 
         }
         .fullscreen-view img {
             max-width: 90%; 
@@ -80,7 +81,7 @@
             padding: 10px;
             border-radius: 5px;
             cursor: pointer;
-            z-index: 11; /* Поверх полноэкранного изображения */
+            z-index: 11; 
         }
     </style> 
 </head> 
@@ -91,7 +92,6 @@
     <canvas id="canvas"></canvas> 
     <img id="photo" alt="Сфотографированное изображение" style="display:none;"> 
 
-    <!-- Полноэкранное изображение для просмотра -->
     <div class="fullscreen-view" id="fullscreenView">
         <button class="close-btn" id="closeBtn">Закрыть</button>
         <img id="fullscreenImg" alt="Полноэкранное изображение">
@@ -140,26 +140,24 @@
                 data[i + 2] = clamp(data[i + 2] + 5); // Синий 
             } 
 
-            context.putImageData(imgData, 0, 0); // Рисуем улучшенное изображение для итогового 
-            photo.src = canvas.toDataURL(); // Обновляем изображение для отображения 
+            context.putImageData(imgData, 0, 0); 
+            photo.src = canvas.toDataURL(); 
 
-            // Добавляем в галерею
             const newImg = document.createElement('img');
             newImg.src = photo.src;
             newImg.addEventListener('click', () => {
-                fullscreenImg.src = newImg.src; // Устанавливаем src для полноэкранного просмотра
-                fullscreenView.style.display = 'flex'; // Показываем полноэкранный просмотр
+                fullscreenImg.src = newImg.src; 
+                fullscreenView.style.display = 'flex'; 
             });
             gallery.appendChild(newImg);
         }); 
 
         function clamp(value) { 
-            return Math.max(0, Math.min(255, value)); // Ограничиваем значение от 0 до 255 
+            return Math.max(0, Math.min(255, value)); 
         } 
 
-        // Закрытие полноэкранного просмотра
         closeBtn.addEventListener('click', () => {
-            fullscreenView.style.display = 'none'; // Скрываем полноэкранный просмотр
+            fullscreenView.style.display = 'none'; 
         });
 
         startCamera('environment'); 
