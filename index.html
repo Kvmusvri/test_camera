@@ -28,7 +28,7 @@
         const toggleButton = document.getElementById('toggle');
         
         let currentStream;
-        let currentFacingMode = 'user'; // 'user' для фронтальной камеры, 'environment' для тыльной
+        let currentFacingMode = 'environment'; // Тыльная камера по умолчанию
         
         async function startCamera(facingMode) {
             try {
@@ -54,7 +54,7 @@
 
         // Переключение камер
         toggleButton.addEventListener('click', () => {
-            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+            currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
             startCamera(currentFacingMode);
         });
 
