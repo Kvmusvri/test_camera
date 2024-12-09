@@ -17,7 +17,7 @@
         }
         video, canvas {
             width: 100%;
-            max-width: 400px;
+            max-width: 600px;
             border: 2px solid #fff;
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
@@ -44,7 +44,7 @@
 <body>
     <h1 style="color: white;">Камера для документов</h1>
     <video id="video" autoplay playsinline muted></video>
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas" style="display:none;"></canvas>
     <img id="photo" alt="Документ">
     <button id="capture">Сделать снимок</button>
 
@@ -60,14 +60,15 @@
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: 'environment',
-                        width: { ideal: 1920 }, // Высококачественный поток
-                        height: { ideal: 1080 }
+                        width: { ideal: 1280 },  // Ширина видео
+                        height: { ideal: 720 }   // Высота видео
                     }
                 });
                 video.srcObject = stream;
 
-                // Непрямая обработка потока (передача в OpenCV)
-                video.addEventListener('play', () => {
+                // Обработка видео в реальном времени
+                video.addEventListener('loadedmetadata', () => {
+                    // После загрузки видео можно начать обработку
                     processVideo();
                 });
 
@@ -77,23 +78,20 @@
         }
 
         function processVideo() {
-            // Используем OpenCV для обработки видео
             const cap = new cv.VideoCapture(video);
-            const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
-            const dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+            const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4); // Исходное изображение
+            const dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1); // Обработанное изображение
 
             function processFrame() {
                 cap.read(src);
                 
-                // Фильтр повышения четкости
-                let kernel = cv.Mat.ones(3, 3, cv.CV_32F);
-                kernel.data32F[4] = 10.0; // Центр матрицы усиливает резкость
-                cv.filter2D(src, dst, -1, kernel);
+                // Преобразуем цвет в оттенки серого для повышения четкости текста
+                cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
 
-                // Усиление контраста
-                cv.convertScaleAbs(dst, dst, 1.2, 60);
+                // Применяем бинаризацию для улучшения контраста текста
+                cv.threshold(dst, dst, 150, 255, cv.THRESH_BINARY);
 
-                // Выводим обработанное видео на экран
+                // Показываем результат
                 cv.imshow('canvas', dst);
 
                 requestAnimationFrame(processFrame);
