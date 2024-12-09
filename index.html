@@ -5,33 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Веб-камера с переключением</title> 
     <style> 
-        body { display: flex; flex-direction: column; align-items: center; margin: 0; } 
+        body { display: flex; flex-direction: column; align-items: center; margin: 0; position: relative; } 
         video { width: 100%; max-width: 400px; border: 1px solid black; } 
         canvas { display: none; } 
         img { margin-top: 10px; max-width: 100%; border: 1px solid black; } 
-        button { margin-top: 10px; } 
+        button { 
+            border: none; 
+            border-radius: 50%; 
+            width: 70px; 
+            height: 70px; 
+            background-color: rgba(255, 255, 255, 0.8); 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
+            cursor: pointer; 
+            position: absolute; 
+            bottom: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        } 
+        .gallery {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: row;
+            overflow-x: auto;
+        }
+        .gallery img {
+            width: 100px;
+            height: auto;
+            margin: 0 5px;
+            border: 2px solid black;
+            border-radius: 5px;
+        }
     </style> 
 </head> 
 <body> 
     <video id="video" autoplay playsinline muted></video> 
-    <button id="snap">Сфотографировать</button> 
+    <div class="gallery" id="gallery"></div>
+    <button id="snap">+</button> 
     <canvas id="canvas"></canvas> 
-    <img id="photo" alt="Сфотографированное изображение"> 
+    <img id="photo" alt="Сфотографированное изображение" style="display:none;"> 
     <script> 
         const video = document.getElementById('video'); 
         const canvas = document.getElementById('canvas'); 
         const context = canvas.getContext('2d'); 
         const photo = document.getElementById('photo'); 
- 
+        const gallery = document.getElementById('gallery'); 
+
         let currentStream; 
         let currentFacingMode = 'environment'; // Тыльная камера по умолчанию 
- 
+
         async function startCamera(facingMode) { 
             if (currentStream) { 
                 const tracks = currentStream.getTracks(); 
                 tracks.forEach(track => track.stop()); 
             } 
-
             currentStream = await navigator.mediaDevices.getUserMedia({ 
                 video: { 
                     facingMode: facingMode, 
@@ -41,69 +71,65 @@
                     frameRate: {min: 20} 
                 } 
             }); 
-
             video.srcObject = currentStream; 
-
             // Запускаем обновление кадра для превью 
             updatePreview(); 
         } 
- 
+
         function updatePreview() { 
             canvas.width = video.videoWidth; 
             canvas.height = video.videoHeight; 
             context.drawImage(video, 0, 0, canvas.width, canvas.height); 
- 
+
             // Получаем изображение для обработки 
             let imgData = context.getImageData(0, 0, canvas.width, canvas.height); 
             let data = imgData.data; 
- 
+
             // Улучшение контрастности (уменьшенная сила фильтра) 
             for (let i = 0; i < data.length; i += 4) { 
                 data[i] = clamp(data[i] + 10);      // Красный 
                 data[i + 1] = clamp(data[i + 1] + 10); // Зеленый 
                 data[i + 2] = clamp(data[i + 2] + 10); // Синий 
             } 
- 
+
             context.putImageData(imgData, 0, 0); // Рисуем обработанное изображение 
             photo.src = canvas.toDataURL(); // Обновляем изображение для отображения 
- 
             requestAnimationFrame(updatePreview); // Обновление кадра  
         } 
- 
+
         function clamp(value) { 
             return Math.max(0, Math.min(255, value)); // Ограничиваем значение от 0 до 255 
         } 
- 
+
         document.getElementById('snap').addEventListener('click', () => { 
-            // Когда фотосъемка происходит, отключаем превью 
             const originalWidth = canvas.width; 
             const originalHeight = canvas.height; 
- 
-            // Измеряем оригинальный размер для окончательного снимка 
             canvas.width = video.videoWidth; 
             canvas.height = video.videoHeight; 
- 
-            context.drawImage(video, 0, 0, canvas.width, canvas.height); // Рисуем кадр с видео 
- 
+            context.drawImage(video, 0, 0, canvas.width, canvas.height); 
+
             // Получаем изображение и улучшаем его 
             let imgData = context.getImageData(0, 0, canvas.width, canvas.height); 
             let data = imgData.data; 
- 
-            // Применяем более мягкий фильтр на окончательном снимке 
+
             for (let i = 0; i < data.length; i += 4) {
                 data[i] = clamp(data[i] + 5); // Красный
                 data[i + 1] = clamp(data[i + 1] + 5); // Зеленый 
                 data[i + 2] = clamp(data[i + 2] + 5); // Синий 
             } 
- 
+
             context.putImageData(imgData, 0, 0); // Рисуем улучшенное изображение для итогового 
             photo.src = canvas.toDataURL(); // Обновляем изображение для отображения 
- 
-            // Возвращаем холст к оригинальным размерам 
+            
+            // Добавляем в галерею
+            const newImg = document.createElement('img');
+            newImg.src = photo.src;
+            gallery.appendChild(newImg);
+
             canvas.width = originalWidth; 
             canvas.height = originalHeight; 
         }); 
- 
+
         startCamera(currentFacingMode); 
     </script> 
 </body> 
