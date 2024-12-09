@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Веб-камера</title>
+    <title>Веб-камера с переключением</title>
     <style>
         body { display: flex; flex-direction: column; align-items: center; margin: 0; }
         video { width: 100%; max-width: 400px; border: 1px solid black; }
@@ -16,6 +16,7 @@
     <h1>Сфотографируйте что-то!</h1>
     <video id="video" autoplay playsinline muted></video>
     <button id="snap">Сфотографировать</button>
+    <button id="toggle">Переключить камеру</button>
     <canvas id="canvas"></canvas>
     <img id="photo" alt="Сфотографированное изображение">
 
@@ -24,19 +25,40 @@
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
         const photo = document.getElementById('photo');
-
-        async function startCamera() {
+        const toggleButton = document.getElementById('toggle');
+        
+        let currentStream;
+        let currentFacingMode = 'user'; // 'user' для фронтальной камеры, 'environment' для тыльной
+        
+        async function startCamera(facingMode) {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
+                // Останавливаем текущее видео, если есть
+                if (currentStream) {
+                    const tracks = currentStream.getTracks();
+                    tracks.forEach(track => track.stop());
+                }
+
+                // Запрашиваем доступ к камере с заданным режимом
+                currentStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facingMode }
+                });
+                video.srcObject = currentStream;
             } catch (err) {
                 console.error("Ошибка доступа к камере: ", err);
                 alert("Не удалось получить доступ к камере. Убедитесь, что камера подключена и разрешите доступ.");
             }
         }
 
-        startCamera();
+        // Инициализация камеры
+        startCamera(currentFacingMode);
 
+        // Переключение камер
+        toggleButton.addEventListener('click', () => {
+            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+            startCamera(currentFacingMode);
+        });
+
+        // Захват изображения
         document.getElementById('snap').addEventListener('click', () => {
             const width = video.videoWidth;
             const height = video.videoHeight;
