@@ -44,33 +44,69 @@
                 });
 
                 video.srcObject = currentStream;
+
+                // Запускаем обновление кадра для превью
+                updatePreview();
             } catch (err) {
                 console.error("Ошибка доступа к камере: ", err);
                 alert("Не удалось получить доступ к камере. Убедитесь, что камера подключена и разрешите доступ.");
             }
         }
 
-        document.getElementById('snap').addEventListener('click', () => {
-            canvas.width = video.videoWidth; // Устанавливаем размер холста
+        function updatePreview() {
+            canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Получаем изображение для обработки
+            let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+            let data = imgData.data;
+
+            // Улучшение контрастности (уменьшенная сила фильтра)
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = clamp(data[i] + 10);      // Красный
+                data[i + 1] = clamp(data[i + 1] + 10); // Зеленый
+                data[i + 2] = clamp(data[i + 2] + 10); // Синий
+            }
+
+            context.putImageData(imgData, 0, 0); // Рисуем обработанное изображение
+            photo.src = canvas.toDataURL(); // Обновляем изображение для отображения
+
+            requestAnimationFrame(updatePreview); // Обновление кадра 
+        }
+
+        function clamp(value) {
+            return Math.max(0, Math.min(255, value)); // Ограничиваем значение от 0 до 255
+        }
+
+        document.getElementById('snap').addEventListener('click', () => {
+            // Когда фотосъемка происходит, отключаем превью
+            const originalWidth = canvas.width;
+            const originalHeight = canvas.height;
+
+            // Измеряем оригинальный размер для окончательного снимка
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
             context.drawImage(video, 0, 0, canvas.width, canvas.height); // Рисуем кадр с видео
 
             // Получаем изображение и улучшаем его
             let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
             let data = imgData.data;
 
-            // Применяем резкость и контрастность
+            // Применяем более мягкий фильтр на окончательном снимке
             for (let i = 0; i < data.length; i += 4) {
-                // Увеличение контрастности (можно настраивать коэффициенты)
-                data[i] = data[i] > 128 ? Math.min(data[i] + 30, 255) : Math.max(data[i] - 30, 0);
-                data[i + 1] = data[i + 1] > 128 ? Math.min(data[i + 1] + 30, 255) : Math.max(data[i + 1] - 30, 0);
-                data[i + 2] = data[i + 2] > 128 ? Math.min(data[i + 2] + 30, 255) : Math.max(data[i + 2] - 30, 0);
+                data[i] = clamp(data[i] + 5); // Редко
+                data[i + 1] = clamp(data[i + 1] + 5); // Зеленый
+                data[i + 2] = clamp(data[i + 2] + 5); // Синий
             }
 
-            context.putImageData(imgData, 0, 0); // Рисуем улучшенное изображение
+            context.putImageData(imgData, 0, 0); // Рисуем улучшенное изображение для итогового
+            photo.src = canvas.toDataURL(); // Обновляем изображение для отображения
 
-            // Отображаем на экране
-            photo.src = canvas.toDataURL();
+            // Возвращаем холст к оригинальным размерам
+            canvas.width = originalWidth;
+            canvas.height = originalHeight;
         });
 
         startCamera(currentFacingMode);
