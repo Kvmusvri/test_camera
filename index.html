@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Камера для документов</title>
+    <title>Документы Камера</title>
     <style>
         body {
             display: flex;
@@ -22,11 +22,6 @@
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
         }
-        img {
-            margin-top: 10px;
-            max-width: 100%;
-            border: 2px solid white;
-        }
         button {
             background: rgba(255, 255, 255, 0.8);
             border: none;
@@ -35,23 +30,18 @@
             margin-top: 10px;
             cursor: pointer;
             font-size: 16px;
-            color: black;
-            box-shadow: 0 3px 10px rgba(255, 255, 255, 0.3);
         }
     </style>
-    <script src="https://docs.opencv.org/4.x/opencv.js" async></script>
 </head>
 <body>
     <h1 style="color: white;">Камера для документов</h1>
     <video id="video" autoplay playsinline muted></video>
     <canvas id="canvas" style="display:none;"></canvas>
-    <img id="photo" alt="Документ">
     <button id="capture">Сделать снимок</button>
 
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
-        const photo = document.getElementById('photo');
         const captureBtn = document.getElementById('capture');
         let stream;
 
@@ -60,55 +50,48 @@
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: 'environment',
-                        width: { ideal: 1280 },  // Ширина видео
-                        height: { ideal: 720 }   // Высота видео
+                        width: { ideal: 1280 },  // Высокое разрешение
+                        height: { ideal: 720 }
                     }
                 });
                 video.srcObject = stream;
-
-                // Обработка видео в реальном времени
-                video.addEventListener('loadedmetadata', () => {
-                    // После загрузки видео можно начать обработку
-                    processVideo();
-                });
-
             } catch (error) {
                 alert('Ошибка доступа к камере: ' + error.message);
             }
         }
 
-        function processVideo() {
-            const cap = new cv.VideoCapture(video);
-            const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4); // Исходное изображение
-            const dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1); // Обработанное изображение
-
-            function processFrame() {
-                cap.read(src);
-                
-                // Преобразуем цвет в оттенки серого для повышения четкости текста
-                cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-
-                // Применяем бинаризацию для улучшения контраста текста
-                cv.threshold(dst, dst, 150, 255, cv.THRESH_BINARY);
-
-                // Показываем результат
-                cv.imshow('canvas', dst);
-
-                requestAnimationFrame(processFrame);
-            }
-            requestAnimationFrame(processFrame);
-        }
-
         captureBtn.addEventListener('click', () => {
-            // Съемка фото
             const ctx = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // Сохраняем кадр
-            photo.src = canvas.toDataURL('image/png');
+            // Подготовка для загрузки изображения
+            const imageData = canvas.toDataURL('image/png');
+
+            // Загрузка изображения на сервер
+            uploadImage(imageData);
         });
+
+        function uploadImage(data) {
+            fetch('https://example.com/upload', {  // Замените на ваш URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: data })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Изображение успешно загружено!');
+                } else {
+                    alert('Ошибка загрузки изображения.');
+                }
+            })
+            .catch(error => {
+                alert('Произошла ошибка: ' + error.message);
+            });
+        }
 
         // Запуск камеры
         initCamera();
