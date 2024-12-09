@@ -39,6 +39,7 @@
                 // Запрашиваем доступ к камере с заданным режимом
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: {
+                        facingMode: facingMode,
                         width: {min: 640, ideal: 1280},
                         height: {min: 480, ideal: 720},
                         aspectRatio: 3/2,
