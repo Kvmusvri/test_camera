@@ -47,6 +47,8 @@
                         frameRate: {min: 30, ideal: 60}
                     }
                 });
+
+                videoElement.srcObject = currentStream;
                 
                 
             } catch (err) {
