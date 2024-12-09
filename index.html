@@ -1,57 +1,165 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Камера на телефоне</title>
-    <style>
-        body { display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
-        input[type="file"] { display: none; }
-        img { margin-top: 10px; max-width: 300px; border: 1px solid black; }
-        button { margin-top: 10px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camera Demo</title>
+  <link rel="stylesheet" href="/assets/styles/main.css">
 </head>
 <body>
-   <!--
-	Ideally these elements aren't created until it's confirmed that the 
-	client supports video/camera, but for the sake of illustrating the 
-	elements involved, they are created with markup (not JavaScript)
--->
-<video id="video" width="640" height="480" autoplay></video>
-<button id="snap">Snap Photo</button>
-<canvas id="canvas" width="640" height="480"></canvas>
+  <div class="camera-ctn">
+    <canvas id="canvas"> </canvas>
+    <div class="camera-view">
+      <video id="camera-stream" autoplay loop muted>
+        <source src="" >
+      </video>
+    </div>
+    <div class="camera-bottom">
+      <div class="inner">
+        <div class="lens-modifier">
+          <button>
+            .5
+          </button>
+          <button class="active">
+            1x
+          </button>
+          <button>
+            3
+          </button>
+        </div>
+        <div class="modes">
+          <button>
+            SINGLE TAKE
+          </button>
+          <button class="active">
+            PHOTO
+          </button>
+          <button>
+            VIDEO
+          </button>
+          <button>
+            PORTRAIT
+          </button>
+        </div>
+        <div class="shutter-ctn">
+          <button id="photos-btn" class="previous-shots">
+          </button>
+          <button id="shutter" class="shutter">
+          </button>
+          <button class="switch-device">
+            Sw
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <script>
-        // Grab elements, create settings, etc.
-var video = document.getElementById('video');
+  <div class="gallery-view">
+    <button id="prev">
+      PREV
+    </button>
+    <img data-index="0" src="" alt="current viewed img">
+    <button id="next">
+      NEXT
+    </button>
+    <button id="close-gallery">
+      GO BACK
+    </button>
+  </div>
 
-// Get access to the camera!
-if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    // Not adding `{ audio: true }` since we only want video now
-    navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
-        //video.src = window.URL.createObjectURL(stream);
-        video.srcObject = stream;
-        video.play();
-    });
+  <!-- JAVASCRIPT LINK -->
+  <script>
+	  const cameraVideoStream = document.getElementById('camera-stream')
+const shutterButton = document.getElementById('shutter')
+const photosButton = document.getElementById('photos-btn')
+const gallery = document.querySelector('.gallery-view')
+const currentImageElement = document.querySelector('.gallery-view img')
+const closeGalleryButton = document.getElementById('close-gallery')
+const nextButton = document.getElementById('next')
+const prevButton = document.getElementById('prev')
+const canvas = document.getElementById('canvas')
+
+let width = window.innerWidth
+let height = 0
+let streaming = false
+
+const capturedImages = []
+const currentImage = 0
+
+// Connect media device
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia({ video: true })) {
+  navigator.mediaDevices.getUserMedia({ video: true }).then ((stream) => {
+    cameraVideoStream.srcObject = stream
+    cameraVideoStream.play()
+  })
+} 
+
+cameraVideoStream.addEventListener(
+  "canplay",
+  (ev) => {
+    if (!streaming) {
+      height = cameraVideoStream.videoHeight / (cameraVideoStream.videoWidth / width);
+      
+      if (isNaN(height)) {
+        height = width / (4 / 3);
+      }
+
+      canvas.setAttribute("width", width);
+      canvas.setAttribute("height", height);
+      cameraVideoStream.setAttribute("width", width);
+      cameraVideoStream.setAttribute("height", height);
+      streaming = true;
+    }
+  },
+  false
+);
+
+// Capture snapshots using HTML Canvas
+function captureImage () {
+  const canvasContext = canvas.getContext('2d')
+  canvas.width = width
+  canvas.height = height
+  canvasContext.drawImage(cameraVideoStream, 0, 0, width, height)
+
+  // Convert captured data to image (base64)
+  const data = canvas.toDataURL('image/png')
+  currentImageElement.src = data
+  photosButton.style.backgroundImage = `url(${data})`
+  capturedImages.push(data)
+  capturedImages.reverse()
+
+  // Create new Image elements from array
+  capturedImages.forEach((image) => {
+
+  })
 }
 
-/* Legacy code below: getUserMedia 
-else if(navigator.getUserMedia) { // Standard
-    navigator.getUserMedia({ video: true }, function(stream) {
-        video.src = stream;
-        video.play();
-    }, errBack);
-} else if(navigator.webkitGetUserMedia) { // WebKit-prefixed
-    navigator.webkitGetUserMedia({ video: true }, function(stream){
-        video.src = window.webkitURL.createObjectURL(stream);
-        video.play();
-    }, errBack);
-} else if(navigator.mozGetUserMedia) { // Mozilla-prefixed
-    navigator.mozGetUserMedia({ video: true }, function(stream){
-        video.srcObject = stream;
-        video.play();
-    }, errBack);
-}
-    </script>
+shutterButton.addEventListener('click', () => captureImage())
+
+// Event handlers to close and open gallery
+photosButton.addEventListener('click', () => {
+  gallery.classList.add('show-gallery')
+  currentImageElement.setAttribute('data-index', 0)
+})
+closeGalleryButton.addEventListener('click', () => gallery.classList.remove('show-gallery'))
+
+// Event handlers to browse gallery (next and previous)
+nextButton.addEventListener('click', () => {
+  const index = Number(currentImageElement.getAttribute('data-index'))
+  if (capturedImages[index + 1]) {
+    currentImageElement.src = capturedImages[index + 1]
+    currentImageElement.setAttribute('data-index', index + 1)
+  }
+})
+prevButton.addEventListener('click', () => {
+  const index = Number(currentImageElement.getAttribute('data-index'))
+  if (capturedImages[index - 1]) {
+    currentImageElement.src = capturedImages[index - 1]
+    currentImageElement.setAttribute('data-index', index - 1)
+  }
+})
+	  
+  </script>
 </body>
 </html>
