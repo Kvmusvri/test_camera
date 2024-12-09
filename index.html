@@ -1,100 +1,22 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Документы</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #000;
-            font-family: 'Arial', sans-serif;
-        }
-        video, canvas {
-            width: 100%;
-            max-width: 600px;
-            border: 2px solid #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-        }
-        button {
-            background: rgba(255, 255, 255, 0.8);
-            border: none;
-            border-radius: 10px;
-            padding: 10px 20px;
-            margin-top: 10px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-    </style>
-</head>
-<body>
-    <h1 style="color: white;">Камера для документов</h1>
-    <video id="video" autoplay playsinline muted></video>
-    <canvas id="canvas" style="display:none;"></canvas>
-    <button id="capture">Сделать снимок</button>
-
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const captureBtn = document.getElementById('capture');
-        let stream;
-
-        async function initCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: 'environment',
-                        width: { ideal: 1280 },  // Высокое разрешение
-                        height: { ideal: 720 }
-                    }
-                });
-                video.srcObject = stream;
-            } catch (error) {
-                alert('Ошибка доступа к камере: ' + error.message);
-            }
-        }
-
-        captureBtn.addEventListener('click', () => {
-            const ctx = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Подготовка для загрузки изображения
-            const imageData = canvas.toDataURL('image/png');
-
-            // Загрузка изображения на сервер
-            uploadImage(imageData);
-        });
-
-        function uploadImage(data) {
-            fetch('https://example.com/upload', {  // Замените на ваш URL
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ image: data })
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert('Изображение успешно загружено!');
-                } else {
-                    alert('Ошибка загрузки изображения.');
-                }
-            })
-            .catch(error => {
-                alert('Произошла ошибка: ' + error.message);
-            });
-        }
-
-        // Запуск камеры
-        initCamera();
-    </script>
-</body>
-</html>
+<video autoplay id="video-player"></video>
+<script>
+if(navigator.webkitGetUserMedia!=null) { 
+  var options = { 
+    video:true, 
+    audio:true 
+  }; 
+  
+  // Запрашиваем доступ к веб-камере
+  navigator.webkitGetUserMedia(options, 
+    function(stream) { 
+      // Получаем тег video
+      var video = document.getElementById('video-player'); 
+      // Включаем поток в тег video
+      video.srcObject = stream; 
+    }, 
+    function(e) { 
+      console.log("произошла ошибка"); 
+    } 
+  ); 
+}
+</script>
