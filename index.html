@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Камера с улучшенным качеством фото</title>
+    <title>Камера с автофокусировкой и улучшенным качеством фото</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/telegram-web-app/1.1.0/telegram-web-app.css" rel="stylesheet">
     <style>
         body {
@@ -62,6 +62,7 @@
         const snapButton = document.getElementById('snap');
 
         let currentStream;
+        let track;
 
         async function startCamera() {
             try {
@@ -70,6 +71,13 @@
                     video: { facingMode: 'environment' }
                 });
                 video.srcObject = currentStream;
+                track = currentStream.getVideoTracks()[0];
+
+                // Включение автофокусировки, если поддерживается
+                const capabilities = track.getCapabilities();
+                if (capabilities.focusMode) {
+                    await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+                }
 
                 // Запускаем обработку потока
                 processVideo();
@@ -80,19 +88,19 @@
         }
 
         function processVideo() {
-            // Используем OpenCV для обработки
             if (cv.getBuildInformation) {
                 const cap = new cv.VideoCapture(video);
                 const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
-                const dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1);
+                const dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC3); // Для улучшения цвета
+                const blurred = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC3); // Для размытых изображений
 
                 const processFrame = () => {
                     cap.read(src);
                     
-                    // Применение обработки (увеличение четкости)
-                    cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY); // Преобразуем в серый цвет
-                    cv.GaussianBlur(dst, dst, new cv.Size(5, 5), 0); // Размытие
-                    cv.Canny(dst, dst, 50, 100); // Применяем Canny для границ
+                    // Применение обработок
+                    cv.cvtColor(src, dst, cv.COLOR_RGBA2RGB); // Преобразуем в RGB
+                    cv.GaussianBlur(dst, blurred, new cv.Size(5, 5), 0); // Размывание
+                    cv.addWeighted(dst, 1.5, blurred, -0.5, 0, dst); // Улучшение резкости изображения
                     cv.imshow('canvas', dst); // Показываем обработанное изображение на canvas
 
                     requestAnimationFrame(processFrame);
@@ -117,7 +125,6 @@
                 canvas.height = height;
 
                 setTimeout(() => {
-                    // Снимаем изображение после небольшой задержки
                     const context = canvas.getContext('2d');
                     context.drawImage(video, 0, 0, width, height);
                     const imageData = canvas.toDataURL('image/png');
