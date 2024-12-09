@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Камера для документов</title>
+    <title>Документы Камера</title>
     <style>
         body {
             display: flex;
@@ -15,7 +15,7 @@
             background-color: #000;
             font-family: 'Arial', sans-serif;
         }
-        video, canvas {
+        video {
             width: 100%;
             max-width: 600px;
             border: 2px solid #fff;
@@ -36,13 +36,13 @@
 <body>
     <h1 style="color: white;">Камера для документов</h1>
     <video id="video" autoplay playsinline muted></video>
-    <canvas id="canvas" style="display:none;"></canvas>
     <button id="capture">Сделать снимок</button>
+    <img id="photo" alt="Снимок" style="display:none; width:100%; max-width:600px;">
 
     <script>
         const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
         const captureBtn = document.getElementById('capture');
+        const photo = document.getElementById('photo');
 
         let imageCapture;
         let stream;
@@ -51,8 +51,8 @@
             try {
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: {
-                        facingMode: 'environment', // Используем тыльную камеру
-                        width: 1280, // Запрашиваем высокое разрешение
+                        facingMode: 'environment',
+                        width: 1280,  // Запрашиваем высокое разрешение
                         height: 720
                     }
                 });
@@ -62,7 +62,7 @@
                 // Инициализация ImageCapture
                 const track = stream.getVideoTracks()[0];
                 imageCapture = new ImageCapture(track);
-                
+
             } catch (error) {
                 alert('Ошибка доступа к камере: ' + error.message);
             }
@@ -73,39 +73,24 @@
                 // Захват изображения в высоком разрешении
                 const imageBitmap = await imageCapture.grabFrame();
                 
-                // Отображение на canvas для предосмотра
-                canvas.width = imageBitmap.width;
-                canvas.height = imageBitmap.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(imageBitmap, 0, 0);
-                
-                // Получаем изображение в формате base64
-                const imageData = canvas.toDataURL('image/png');
-                
-                // Загрузка изображения на сервер
-                uploadImage(imageData);
+                // Отображение изображения
+                photo.src = URL.createObjectURL(await imageBitmapToBlob(imageBitmap));
+                photo.style.display = 'block';
             } catch (error) {
                 alert('Ошибка захвата изображения: ' + error.message);
             }
         });
 
-        function uploadImage(data) {
-            fetch('https://example.com/upload', { // Замените на ваш URL
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ image: data })
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert('Изображение успешно загружено!');
-                } else {
-                    alert('Ошибка загрузки изображения.');
-                }
-            })
-            .catch(error => {
-                alert('Произошла ошибка: ' + error.message);
+        // Преобразование ImageBitmap в Blob
+        async function imageBitmapToBlob(imageBitmap) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = imageBitmap.width;
+                canvas.height = imageBitmap.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(imageBitmap, 0, 0);
+                
+                canvas.toBlob(resolve, 'image/png');
             });
         }
 
