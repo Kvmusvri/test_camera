@@ -12,44 +12,46 @@
     </style>
 </head>
 <body>
-    <h1>Сделайте фото</h1>
-
-    <input type="file" accept="image/*" capture="camera" id="cameraInput1">
-    <button onclick="document.getElementById('cameraInput1').click()">Сфотографировать 1</button>
-    <img id="photo1" alt="Сфотографированное изображение 1">
-
-    <input type="file" accept="image/*" capture="camera" id="cameraInput2">
-    <button onclick="document.getElementById('cameraInput2').click()">Сфотографировать 2</button>
-    <img id="photo2" alt="Сфотографированное изображение 2">
-
-    <input type="file" accept="image/*" capture="camera" id="cameraInput3">
-    <button onclick="document.getElementById('cameraInput3').click()">Сфотографировать 3</button>
-    <img id="photo3" alt="Сфотографированное изображение 3">
+   <!--
+	Ideally these elements aren't created until it's confirmed that the 
+	client supports video/camera, but for the sake of illustrating the 
+	elements involved, they are created with markup (not JavaScript)
+-->
+<video id="video" width="640" height="480" autoplay></video>
+<button id="snap">Snap Photo</button>
+<canvas id="canvas" width="640" height="480"></canvas>
 
     <script>
-        document.getElementById('cameraInput1').addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const img = document.getElementById('photo1');
-                img.src = URL.createObjectURL(file);
-            }
-        });
+        // Grab elements, create settings, etc.
+var video = document.getElementById('video');
 
-        document.getElementById('cameraInput2').addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const img = document.getElementById('photo2');
-                img.src = URL.createObjectURL(file);
-            }
-        });
+// Get access to the camera!
+if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    // Not adding `{ audio: true }` since we only want video now
+    navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+        //video.src = window.URL.createObjectURL(stream);
+        video.srcObject = stream;
+        video.play();
+    });
+}
 
-        document.getElementById('cameraInput3').addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const img = document.getElementById('photo3');
-                img.src = URL.createObjectURL(file);
-            }
-        });
+/* Legacy code below: getUserMedia 
+else if(navigator.getUserMedia) { // Standard
+    navigator.getUserMedia({ video: true }, function(stream) {
+        video.src = stream;
+        video.play();
+    }, errBack);
+} else if(navigator.webkitGetUserMedia) { // WebKit-prefixed
+    navigator.webkitGetUserMedia({ video: true }, function(stream){
+        video.src = window.webkitURL.createObjectURL(stream);
+        video.play();
+    }, errBack);
+} else if(navigator.mozGetUserMedia) { // Mozilla-prefixed
+    navigator.mozGetUserMedia({ video: true }, function(stream){
+        video.srcObject = stream;
+        video.play();
+    }, errBack);
+}
     </script>
 </body>
 </html>
