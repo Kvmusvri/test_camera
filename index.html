@@ -5,8 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Веб-камера с переключением</title> 
     <style> 
-        body { display: flex; flex-direction: column; align-items: center; margin: 0; position: relative; } 
-        video { width: 100%; max-width: 400px; border: 1px solid black; } 
+        body { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            margin: 0; 
+            position: relative; 
+            height: 100vh; 
+            overflow: hidden; 
+        } 
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover;  /* covers the video area */
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+        } 
         canvas { display: none; } 
         img { margin-top: 10px; max-width: 100%; border: 1px solid black; } 
         button { 
@@ -14,7 +29,7 @@
             border-radius: 50%; 
             width: 70px; 
             height: 70px; 
-            background-color: rgba(255, 255, 255, 0.8); 
+            background-color: rgba(255, 255, 255, 0.3); /* еле прозрачный фон */ 
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
             cursor: pointer; 
             position: absolute; 
@@ -22,15 +37,18 @@
             display: flex; 
             justify-content: center; 
             align-items: center; 
+            left: 50%; /* Центрируем по горизонтали */
+            transform: translateX(-50%);
         } 
         .gallery {
             position: absolute;
             top: 10px;
-            left: 50%;
+            left: 40%; /* Смещаем галерею чуть левее */
             transform: translateX(-50%);
             display: flex;
             flex-direction: row;
             overflow-x: auto;
+            z-index: 1; /* Делаем галерею над видео */
         }
         .gallery img {
             width: 100px;
@@ -44,7 +62,7 @@
 <body> 
     <video id="video" autoplay playsinline muted></video> 
     <div class="gallery" id="gallery"></div>
-    <button id="snap">+</button> 
+    <button id="snap"></button> 
     <canvas id="canvas"></canvas> 
     <img id="photo" alt="Сфотографированное изображение" style="display:none;"> 
     <script> 
@@ -55,7 +73,6 @@
         const gallery = document.getElementById('gallery'); 
 
         let currentStream; 
-        let currentFacingMode = 'environment'; // Тыльная камера по умолчанию 
 
         async function startCamera(facingMode) { 
             if (currentStream) { 
@@ -72,43 +89,13 @@
                 } 
             }); 
             video.srcObject = currentStream; 
-            // Запускаем обновление кадра для превью 
-            updatePreview(); 
-        } 
-
-        function updatePreview() { 
-            canvas.width = video.videoWidth; 
-            canvas.height = video.videoHeight; 
-            context.drawImage(video, 0, 0, canvas.width, canvas.height); 
-
-            // Получаем изображение для обработки 
-            let imgData = context.getImageData(0, 0, canvas.width, canvas.height); 
-            let data = imgData.data; 
-
-            // Улучшение контрастности (уменьшенная сила фильтра) 
-            for (let i = 0; i < data.length; i += 4) { 
-                data[i] = clamp(data[i] + 10);      // Красный 
-                data[i + 1] = clamp(data[i + 1] + 10); // Зеленый 
-                data[i + 2] = clamp(data[i + 2] + 10); // Синий 
-            } 
-
-            context.putImageData(imgData, 0, 0); // Рисуем обработанное изображение 
-            photo.src = canvas.toDataURL(); // Обновляем изображение для отображения 
-            requestAnimationFrame(updatePreview); // Обновление кадра  
-        } 
-
-        function clamp(value) { 
-            return Math.max(0, Math.min(255, value)); // Ограничиваем значение от 0 до 255 
         } 
 
         document.getElementById('snap').addEventListener('click', () => { 
-            const originalWidth = canvas.width; 
-            const originalHeight = canvas.height; 
             canvas.width = video.videoWidth; 
             canvas.height = video.videoHeight; 
             context.drawImage(video, 0, 0, canvas.width, canvas.height); 
 
-            // Получаем изображение и улучшаем его 
             let imgData = context.getImageData(0, 0, canvas.width, canvas.height); 
             let data = imgData.data; 
 
@@ -120,17 +107,18 @@
 
             context.putImageData(imgData, 0, 0); // Рисуем улучшенное изображение для итогового 
             photo.src = canvas.toDataURL(); // Обновляем изображение для отображения 
-            
+
             // Добавляем в галерею
             const newImg = document.createElement('img');
             newImg.src = photo.src;
             gallery.appendChild(newImg);
-
-            canvas.width = originalWidth; 
-            canvas.height = originalHeight; 
         }); 
 
-        startCamera(currentFacingMode); 
+        function clamp(value) { 
+            return Math.max(0, Math.min(255, value)); // Ограничиваем значение от 0 до 255 
+        } 
+
+        startCamera('environment'); 
     </script> 
 </body> 
 </html>
