@@ -3,75 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Веб-камера</title>
+    <title>Улучшенное Видеопоток</title>
     <style>
-        body { display: flex; flex-direction: column; align-items: center; margin: 0; }
-        video { width: 100%; max-width: 400px; border: 1px solid black; }
-        canvas { display: none; }
-        img { margin-top: 10px; max-width: 100%; border: 1px solid black; }
-        button { margin-top: 10px; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        video {
+            border: 2px solid #333;
+            width: 80%;
+            max-width: 720px;
+        }
     </style>
 </head>
 <body>
-    <video id="video" autoplay playsinline muted></video>
-    <button id="snap">Сфотографировать</button>
-    <canvas id="canvas"></canvas>
-    <img id="photo" alt="Сфотографированное изображение">
 
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const photo = document.getElementById('photo');
-        const toggleButton = document.getElementById('toggle');
-        
-        let currentStream;
-        let currentFacingMode = 'environment'; // Тыльная камера по умолчанию
-        
-        async function startCamera(facingMode) {
-            try {
-                // Останавливаем текущее видео, если есть
-                if (currentStream) {
-                    const tracks = currentStream.getTracks();
-                    tracks.forEach(track => track.stop());
+<video id="video" autoplay playsinline></video>
+
+<script>
+    async function startVideo() {
+        try {
+            const constraints = {
+                video: {
+                    facingMode: "environment", // Используйте "environment" для задней камеры
+                    width: { ideal: 3840  }, // Идеальная ширина
+                    height: { ideal: 2160  }, // Идеальная высота
+                    frameRate: { ideal: 60 } // Идеальная частота кадров
                 }
+            };
 
-                // Запрашиваем доступ к камере с заданным режимом
-                currentStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode }
-                });
-                video.srcObject = currentStream;
-            } catch (err) {
-                console.error("Ошибка доступа к камере: ", err);
-                alert("Не удалось получить доступ к камере. Убедитесь, что камера подключена и разрешите доступ.");
-            }
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            const videoElement = document.getElementById('video');
+            videoElement.srcObject = stream;
+
+            // Опциональная обработка видео (например, с помощью Canvas API)
+            // const canvas = document.createElement('canvas');
+            // const ctx = canvas.getContext('2d');
+            // videoElement.onplaying = () => {
+            //    // Код для обработки видео
+            // };
+        } catch (error) {
+            console.error('Ошибка при получении видеопотока:', error);
         }
+    }
 
-        // Инициализация камеры
-        startCamera(currentFacingMode);
+    // Запуск функции для начала получения видео
+    startVideo();
+</script>
 
-        // Переключение камер
-        toggleButton.addEventListener('click', () => {
-            currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
-            startCamera(currentFacingMode);
-        });
-
-        // Захват изображения
-        document.getElementById('snap').addEventListener('click', () => {
-            const width = video.videoWidth;
-            const height = video.videoHeight;
-
-            if (width && height) {
-                canvas.width = width;
-                canvas.height = height;
-                context.drawImage(video, 0, 0, width, height);
-                const dataURL = canvas.toDataURL('image/png');
-                photo.setAttribute('src', dataURL);
-            } else {
-                console.error("Не удалось получить размеры видео.");
-                alert("Не удается сделать снимок. Убедитесь, что камера работает.");
-            }
-        });
-    </script>
 </body>
 </html>
