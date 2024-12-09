@@ -14,7 +14,7 @@
 </head>
 <body>
     <h1>Сфотографируйте что-то!</h1>
-    <video id="video" autoplay playsinline></video>
+    <video id="video" autoplay playsinline muted></video>
     <button id="snap">Сфотографировать</button>
     <canvas id="canvas"></canvas>
     <img id="photo" alt="Сфотографированное изображение">
@@ -31,7 +31,7 @@
                 video.srcObject = stream;
             } catch (err) {
                 console.error("Ошибка доступа к камере: ", err);
-                alert("Не удалось получить доступ к камере. Убедитесь в ее подключении и разрешите доступ.");
+                alert("Не удалось получить доступ к камере. Убедитесь, что камера подключена и разрешите доступ.");
             }
         }
 
@@ -41,11 +41,16 @@
             const width = video.videoWidth;
             const height = video.videoHeight;
 
-            canvas.width = width;
-            canvas.height = height;
-            context.drawImage(video, 0, 0, width, height);
-            const dataURL = canvas.toDataURL('image/png');
-            photo.setAttribute('src', dataURL);
+            if (width && height) {
+                canvas.width = width;
+                canvas.height = height;
+                context.drawImage(video, 0, 0, width, height);
+                const dataURL = canvas.toDataURL('image/png');
+                photo.setAttribute('src', dataURL);
+            } else {
+                console.error("Не удалось получить размеры видео.");
+                alert("Не удается сделать снимок. Убедитесь, что камера работает.");
+            }
         });
     </script>
 </body>
