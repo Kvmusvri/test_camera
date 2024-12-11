@@ -162,7 +162,7 @@
         let tg = window.Telegram.WebApp;
         
         if (!tg.initData) {
-            console.error("Telegram Web App is not initialized.");
+            alert('Telegram Web App is not initialized');
         }
 
         async function startCamera(facingMode) {
@@ -225,9 +225,9 @@
                 try {
                     tg.sendData(JSON.stringify({ photos }));
                 } catch (error) {
-                    console.error("Error sending data:", error);
+                    alert("Error sending data:", error);
                 }
-                tg.close();
+                setTimeout(() => tg.close(), 100);
             } else {
                 alert('Нет фото для отправки.');
             }
