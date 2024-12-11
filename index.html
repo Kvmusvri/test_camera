@@ -35,7 +35,6 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             cursor: pointer;
             position: absolute;
-            bottom: 20px;
         }
 
         #snap {
@@ -44,7 +43,8 @@
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.3);
             left: 50%;
-            transform: translateX(-50%-110px);
+            transform: translateX(-50%);
+            top: calc(50% - 35px); /* Центрируем кнопку по вертикали */
         }
 
         #send {
@@ -60,13 +60,15 @@
             justify-content: center;
             position: absolute;
             bottom: 20px;
-            left: calc(10%); /* Смещение влево для выравнивания */
+            left: 50%;
+            transform: translateX(-50%); /* Центрируем кнопку по горизонтали */
         }
 
         .thumbnail {
             position: absolute;
             bottom: 20px;
-            right: 20px;
+            left: 50%;
+            transform: translateX(-50%); /* Центрируем контейнер миниатюр */
             z-index: 2;
         }
 
