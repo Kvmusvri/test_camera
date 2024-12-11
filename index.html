@@ -208,14 +208,13 @@
             fullscreenView.style.display = 'none';
         });
 
+        
+
         // Отправка данных в Telegram
         sendButton.addEventListener('click', () => {
             if (photos.length > 0) {
                 
-                const json = atob(photos[0].substring(29));
-                alert(JSON.parse(json));
-                const result = JSON.parse(json)
-                const jsonData = JSON.stringify(result);
+                const jsonData = JSON.stringify(photos[0].substring(29));
 
                 
                 
