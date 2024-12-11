@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Веб-камера с улучшенной постобработкой</title>
+    <title>Камера</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <style>
         body {
@@ -160,6 +160,10 @@
         let photos = [];
 
         let tg = window.Telegram.WebApp;
+        
+        if (!tg.initData) {
+            console.error("Telegram Web App is not initialized.");
+        }
 
         async function startCamera(facingMode) {
             if (currentStream) {
@@ -218,9 +222,11 @@
 
         sendButton.addEventListener('click', () => {
             if (photos.length > 0) {
-
-                
-                tg.sendData(JSON.stringify({photos}));
+                try {
+                    tg.sendData(JSON.stringify({ photos }));
+                } catch (error) {
+                    console.error("Error sending data:", error);
+                }
                 tg.close();
             } else {
                 alert('Нет фото для отправки.');
