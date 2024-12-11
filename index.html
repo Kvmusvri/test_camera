@@ -270,10 +270,7 @@
                     
                     // Проверяем общий размер данных
                     const jsonData = JSON.stringify(base64Photos);
-                    if (jsonData.length > 64000) {
-                        alert("Слишком большой размер данных для отправки.");
-                        return;
-                    }
+
                     //jsonData
                     tg.sendData("пичинушки");
                     alert("Файлы отправлены");
