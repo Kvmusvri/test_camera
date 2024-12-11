@@ -226,15 +226,11 @@
             updateThumbnail(photoUrl);
         });
 
-        sendButton.addEventListener('click', async () => {
+        sendButton.addEventListener('click', () => {
             if (photos.length > 0) {
                 try {
-                    const base64Photos = [];
-                    for (const photo of photos) {
-                        const base64 = await convertToBase64(photo);
-                        base64Photos.push(base64);
-                    }
-                    
+                    // Строки Data URL уже подходят для отправки
+                    const base64Photos = photos.map(photo => photo.replace(/^data:image\/[a-z]+;base64,/, '')); // Убираем префикс
                     tg.sendData(JSON.stringify(base64Photos));
                     alert("Файлы отправлены");
                     setTimeout(() => tg.close(), 100);
