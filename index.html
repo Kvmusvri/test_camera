@@ -229,7 +229,9 @@
 
                 let durl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA";
 
-                alert(Blob([photos[0]]).size);
+                let size = new Blob([photos[0]]).size;
+                
+                alert(size);
                 
                 let data = {
                     photos: photos,
