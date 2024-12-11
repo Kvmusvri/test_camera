@@ -187,7 +187,7 @@
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const photoUrl = canvas.toDataURL("image/jpeg", 0.1); // Сжатие
+            const photoUrl = canvas.toDataURL("image/jpeg", 1); // Сжатие
             photos.unshift(photoUrl);
             updateThumbnail(photoUrl);
         });
