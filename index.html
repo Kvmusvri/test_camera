@@ -75,10 +75,14 @@
             display: flex;
             gap: 10px;
             overflow-x: auto;
+            height: 90%;
+            align-items: center;
+            justify-content: center;
         }
 
         .fullscreen-view img {
             max-height: 90%;
+            max-width: 100%;
             object-fit: contain;
         }
 
@@ -93,18 +97,6 @@
             cursor: pointer;
             z-index: 11;
         }
-
-        .flash-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: rgba(255, 255, 255, 0.3);
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-        }
     </style>
 </head>
 
@@ -117,7 +109,6 @@
         <button class="close-btn" id="closeBtn">Закрыть</button>
         <div class="slider" id="slider"></div>
     </div>
-    <button class="flash-toggle" id="flashToggle">&#9889;</button>
 
     <script>
         const video = document.getElementById('video');
@@ -128,11 +119,9 @@
         const fullscreenView = document.getElementById('fullscreenView');
         const slider = document.getElementById('slider');
         const closeBtn = document.getElementById('closeBtn');
-        const flashToggle = document.getElementById('flashToggle');
 
         let currentStream;
         let photos = [];
-        let flashEnabled = false;
 
         async function startCamera(facingMode) {
             if (currentStream) {
@@ -213,18 +202,6 @@
 
         closeBtn.addEventListener('click', () => {
             fullscreenView.style.display = 'none';
-        });
-
-        flashToggle.addEventListener('click', () => {
-            flashEnabled = !flashEnabled;
-            flashToggle.style.backgroundColor = flashEnabled ? 'yellow' : 'rgba(255, 255, 255, 0.3)';
-
-            // Включение вспышки (если поддерживается)
-            if ("ImageCapture" in window) {
-                const track = currentStream.getVideoTracks()[0];
-                const imageCapture = new ImageCapture(track);
-                imageCapture.setTorchMode(flashEnabled ? 'on' : 'off').catch(() => console.warn('Вспышка не поддерживается.'));
-            }
         });
 
         function clamp(value) {
