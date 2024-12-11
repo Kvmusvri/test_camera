@@ -213,7 +213,7 @@
             if (photos.length > 0) {
                 const jsonData = JSON.stringify(photos);
                 
-                tg.sendData('чеченцы');
+                tg.sendData(photos);
                 alert('Фото отправлены!');
                 setTimeout(() => tg.close(), 100);
                 
