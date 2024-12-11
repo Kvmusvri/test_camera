@@ -69,15 +69,16 @@
             align-items: center;
             justify-content: center;
             z-index: 10;
+            overflow-x: auto;
         }
 
         .fullscreen-view .slider {
             display: flex;
             gap: 10px;
-            overflow-x: auto;
             height: 90%;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end;
+            padding: 0 20px;
         }
 
         .fullscreen-view img {
@@ -88,14 +89,23 @@
 
         .close-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: white;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.7);
             border: none;
             padding: 10px;
-            border-radius: 5px;
+            border-radius: 50%;
             cursor: pointer;
             z-index: 11;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn::before {
+            content: '✕';
+            font-size: 20px;
+            color: #000;
         }
     </style>
 </head>
@@ -106,7 +116,7 @@
     <button id="snap"></button>
     <canvas id="canvas"></canvas>
     <div class="fullscreen-view" id="fullscreenView">
-        <button class="close-btn" id="closeBtn">Закрыть</button>
+        <button class="close-btn" id="closeBtn"></button>
         <div class="slider" id="slider"></div>
     </div>
 
@@ -171,7 +181,7 @@
             context.putImageData(imageData, 0, 0);
 
             const photoUrl = canvas.toDataURL();
-            photos.push(photoUrl);
+            photos.unshift(photoUrl);
 
             updateThumbnail(photoUrl);
         });
@@ -198,6 +208,7 @@
             });
 
             fullscreenView.style.display = 'flex';
+            slider.scrollLeft = slider.scrollWidth; // Позиционируем на последний кадр
         }
 
         closeBtn.addEventListener('click', () => {
