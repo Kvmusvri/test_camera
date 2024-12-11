@@ -211,11 +211,8 @@
         // Отправка данных в Telegram
         sendButton.addEventListener('click', () => {
             if (photos.length > 0) {
-                const blobedPhotos = [];
-                for (const photo of photos) {
-                    blobedPhotos.push(String(photo));
-                }
-                const jsonData = JSON.stringify(blobedPhotos);
+                
+                const jsonData = JSON.stringify(String(photos[0]));
                 
                 tg.sendData(jsonData);
                 alert('Фото отправлены!');
