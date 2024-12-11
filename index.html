@@ -213,7 +213,7 @@
             if (photos.length > 0) {
                 const blobedPhotos = [];
                 for (const photo of photos) {
-                    blobedPhotos.push(atob(photo.split(',')[1]));
+                    blobedPhotos.push(String(photo));
                 }
                 const jsonData = JSON.stringify(blobedPhotos);
                 
