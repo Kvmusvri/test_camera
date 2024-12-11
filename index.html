@@ -1,231 +1,137 @@
-<!DOCTYPE html>
-<html lang="ru">
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const snapButton = document.getElementById('snap');
+    const sendButton = document.getElementById('send');
+    const thumbnailContainer = document.getElementById('thumbnail');
+    const fullscreenView = document.getElementById('fullscreenView');
+    const slider = document.getElementById('slider');
+    const closeBtn = document.getElementById('closeBtn');
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Камера</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0;
-            position: relative;
-            height: 100vh;
-            overflow: hidden;
-            background-color: #000;
+    const tg = window.Telegram.WebApp;
+
+    let currentStream;
+    let photos = [];
+
+    tg.expand();
+
+    // Инициализация камеры
+    async function startCamera() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
         }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        canvas {
-            display: none;
-        }
-
-        button {
-            border: none;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            position: absolute;
-        }
-
-        #snap {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.3);
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: 45px;
-        }
-
-        #send {
-            width: 70px;
-            height: 70px;
-            border-radius: 10px;
-            background-color: rgba(255, 255, 255, 0.5);
-            font-size: 14px;
-            font-weight: bold;
-            color: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            bottom: 45px;
-            left: 20px;
-        }
-
-        .thumbnail {
-            width: 70px;
-            height: 70px;
-            position: absolute;
-            bottom: 45px;
-            right: 20px;
-            z-index: 2;
-        }
-
-        .thumbnail img {
-            width: 100%;
-            height: 100%;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .fullscreen-view {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            overflow: hidden;
-        }
-
-        .fullscreen-view .slider {
-            display: flex;
-            gap: 10px;
-            height: 90%;
-            align-items: center;
-            padding: 0 20px;
-            overflow-x: scroll;
-            scroll-behavior: smooth;
-        }
-
-        .fullscreen-view img {
-            max-height: 90%;
-            max-width: 100%;
-            object-fit: contain;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.7);
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 11;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .close-btn::before {
-            content: '✕';
-            font-size: 20px;
-            color: #000;
-        }
-    </style>
-</head>
-
-<body>
-    <video id="video" autoplay playsinline muted></video>
-    <div class="thumbnail" id="thumbnail"></div>
-    <button id="snap"></button>
-    <button id="send">Отправить</button>
-    <canvas id="canvas"></canvas>
-    <div class="fullscreen-view" id="fullscreenView">
-        <button class="close-btn" id="closeBtn"></button>
-        <div class="slider" id="slider"></div>
-    </div>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const snapButton = document.getElementById('snap');
-        const sendButton = document.getElementById('send');
-        const thumbnailContainer = document.getElementById('thumbnail');
-        const fullscreenView = document.getElementById('fullscreenView');
-        const slider = document.getElementById('slider');
-        const closeBtn = document.getElementById('closeBtn');
-
-        const tg = window.Telegram.WebApp;
-
-        let currentStream;
-        let photos = [];
-
-        tg.expand();
-
-        // Инициализация камеры
-        async function startCamera() {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-            }
-            currentStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
-            });
-            video.srcObject = currentStream;
-        }
-
-        // Снимок и обновление миниатюры
-        snapButton.addEventListener('click', () => {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const photoUrl = canvas.toDataURL("image/jpeg", 0.8); // Сжатие
-            photos.unshift(photoUrl);
-            updateThumbnail(photoUrl);
+        currentStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }
         });
+        video.srcObject = currentStream;
+    }
 
-        // Обновление миниатюры
-        function updateThumbnail(url) {
-            thumbnailContainer.innerHTML = '';
+    // Снимок и обновление миниатюры
+    snapButton.addEventListener('click', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const photoUrl = canvas.toDataURL("image/jpeg", 0.8); // Исходное сжатие
+        photos.unshift(photoUrl);
+        updateThumbnail(photoUrl);
+    });
+
+    // Обновление миниатюры
+    function updateThumbnail(url) {
+        thumbnailContainer.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = url;
+        img.addEventListener('click', openFullscreenView);
+        thumbnailContainer.appendChild(img);
+    }
+
+    // Открыть полный экран
+    function openFullscreenView() {
+        slider.innerHTML = '';
+        photos.forEach(photo => {
             const img = document.createElement('img');
-            img.src = url;
-            img.addEventListener('click', openFullscreenView);
-            thumbnailContainer.appendChild(img);
-        }
-
-        // Открыть полный экран
-        function openFullscreenView() {
-            slider.innerHTML = '';
-            photos.forEach(photo => {
-                const img = document.createElement('img');
-                img.src = photo;
-                slider.appendChild(img);
-            });
-            fullscreenView.style.display = 'flex';
-        }
-
-        // Закрыть полный экран
-        closeBtn.addEventListener('click', () => {
-            fullscreenView.style.display = 'none';
+            img.src = photo;
+            slider.appendChild(img);
         });
+        fullscreenView.style.display = 'flex';
+    }
 
-        // Отправка данных в Telegram
-        sendButton.addEventListener('click', () => {
-            if (photos.length > 0) {
-                const jsonData = JSON.stringify(photos);
+    // Закрыть полный экран
+    closeBtn.addEventListener('click', () => {
+        fullscreenView.style.display = 'none';
+    });
+
+    // Функция сжатия изображения
+    function compressImage(imageDataUrl, maxWidth = 800, maxHeight = 800, quality = 0.7) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.src = imageDataUrl;
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // Вычисляем новый размер с учётом пропорций
+                let { width, height } = img;
+                if (width > maxWidth || height > maxHeight) {
+                    if (width / height > maxWidth / maxHeight) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    } else {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Сжимаем изображение
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+        });
+    }
+
+    // Сжатие всех изображений
+    async function compressAllImages(photos, maxDataSize = 64000) {
+        const compressedPhotos = [];
+        for (const photo of photos) {
+            let compressedPhoto = await compressImage(photo);
+            compressedPhotos.push(compressedPhoto);
+
+            // Проверка общего размера
+            const jsonData = JSON.stringify(compressedPhotos);
+            if (jsonData.length > maxDataSize) {
+                alert('Слишком много данных. Некоторые изображения могут быть исключены.');
+                break;
+            }
+        }
+        return compressedPhotos;
+    }
+
+    // Отправка данных в Telegram
+    sendButton.addEventListener('click', async () => {
+        if (photos.length > 0) {
+            try {
+                const compressedPhotos = await compressAllImages(photos);
+                const jsonData = JSON.stringify(compressedPhotos);
+
                 if (jsonData.length > 64000) {
-                    alert('Размер данных превышает лимит');
+                    alert('Размер данных превышает лимит. Уменьшите количество фотографий.');
                 } else {
                     tg.sendData(jsonData);
                     alert('Фото отправлены!');
                     setTimeout(() => tg.close(), 100);
                 }
-            } else {
-                alert('Нет фото для отправки.');
+            } catch (error) {
+                alert('Ошибка при сжатии: ' + error.message);
             }
-        });
+        } else {
+            alert('Нет фото для отправки.');
+        }
+    });
 
-        startCamera();
-    </script>
-</body>
-
-</html>
+    startCamera();
+</script>
