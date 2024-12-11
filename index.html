@@ -168,7 +168,15 @@
                 currentStream.getTracks().forEach(track => track.stop());
             }
             currentStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
+                video: {
+                    facingMode: facingMode,
+                    focusMode: 'continuous',
+                    width: { min: 640, ideal: 1920 },
+                    height: { min: 480, ideal: 1080 },
+                    frameRate: { min: 15, ideal: 20, max: 60 },
+                    aspectRatio: 16/9
+                }
+                
             });
             video.srcObject = currentStream;
         }
@@ -178,7 +186,7 @@
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const photoUrl = canvas.toDataURL("image/jpeg", 0.8); // Сжатие
+            const photoUrl = canvas.toDataURL("image/jpeg", 0.1); // Сжатие
             photos.unshift(photoUrl);
             updateThumbnail(photoUrl);
         });
@@ -219,6 +227,8 @@
                 photo = photos[0].replace(/^data:image\/(png|jpg);base64,/, "");
 
                 let durl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA";
+
+                alert(Blob([photos[0]]).size)
                 
                 let data = {
                     photos: photos,
