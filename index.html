@@ -216,9 +216,10 @@
                 
                 //const jsonData = JSON.stringify(photos[0].substring(29));
 
-                alert(String(photos[0].substring(29)).size)
+                photo = photos[0].replace(/^data:image\/(png|jpg);base64,/, "");
+                jsonData = JSON.stringify(photo)
                 
-                tg.sendData(String(photos[0].substring(29)));
+                tg.sendData();
                 alert('Фото отправлены!');
                 setTimeout(() => tg.close(), 100);
                 
