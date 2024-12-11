@@ -208,9 +208,26 @@
             fullscreenView.style.display = 'none';
         });
 
+        function getImageBlob(url) {
+            var image = new Image();
+            image.setAttribute('crossOrigin', 'anonymous');
+            image.src = url;
+            image.onload = function () {
+                var canvas = document.createElement('canvas');
+                canvas.width = this.naturalWidth;
+                canvas.height = this.naturalHeight;
+                canvas.getContext('2d').drawImage(this, 0, 0);
+                canvas.toBlob(callback);
+            };
+        }
+
         // Отправка данных в Telegram
         sendButton.addEventListener('click', () => {
             if (photos.length > 0) {
+                const blobedPhotos = [];
+                for (const photo of photos) {
+                    blobedPhotos.push(getImageBlob(photo);
+                }
                 const jsonData = JSON.stringify(photos);
                 
                 tg.sendData(jsonData);
