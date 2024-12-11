@@ -40,8 +40,15 @@
             cursor: pointer;
             position: absolute;
             bottom: 20px;
+        }
+
+        #snap {
             left: 50%;
             transform: translateX(-50%);
+        }
+
+        #send {
+            left: calc(50% + 90px);
         }
 
         .thumbnail {
@@ -116,6 +123,7 @@
     <video id="video" autoplay playsinline muted></video>
     <div class="thumbnail" id="thumbnail"></div>
     <button id="snap"></button>
+    <button id="send"></button>
     <canvas id="canvas"></canvas>
     <div class="fullscreen-view" id="fullscreenView">
         <button class="close-btn" id="closeBtn"></button>
@@ -127,6 +135,7 @@
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
         const snapButton = document.getElementById('snap');
+        const sendButton = document.getElementById('send');
         const thumbnailContainer = document.getElementById('thumbnail');
         const fullscreenView = document.getElementById('fullscreenView');
         const slider = document.getElementById('slider');
@@ -186,6 +195,16 @@
             photos.unshift(photoUrl);
 
             updateThumbnail(photoUrl);
+        });
+
+        sendButton.addEventListener('click', () => {
+            if (photos.length > 0) {
+                const latestPhoto = photos[0];
+                console.log('Отправка фото:', latestPhoto); // Здесь можно добавить отправку на сервер
+                alert('Фото отправлено!');
+            } else {
+                alert('Нет фото для отправки.');
+            }
         });
 
         function updateThumbnail(url) {
