@@ -261,22 +261,21 @@
         sendButton.addEventListener('click', async () => {
             if (photos.length > 0) {
                 try {
-                    const base64Photos = [];
+                    const stringifyPhotos = [];
                     for (const photo of photos) {
-                        const compressedPhoto = await compressImage(photo);
-                        const base64 = compressedPhoto.replace(/^data:image\/[a-z]+;base64,/, ''); // Убираем префикс
-                        base64Photos.push(base64);
+                        stringifyPhoto = JSON.stringify(photo);
+                        stringifyPhotos.push(stringifyPhoto);
                     }
                     
                     // Проверяем общий размер данных
-                    const jsonData = JSON.stringify(base64Photos);
+                    //const jsonData = JSON.stringify(base64Photos);
 
                     //jsonData
-                    tg.sendData("пичинушки");
+                    tg.sendData(stringifyPhotos);
                     alert("Файлы отправлены");
                     setTimeout(() => tg.close(), 100);
                 } catch (error) {
-                    alert("Ошибка при отправке: " + error.message);
+                    alert(error.message);
                 }
             } else {
                 alert('Нет фото для отправки.');
