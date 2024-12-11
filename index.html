@@ -228,7 +228,7 @@
                 for (const photo of photos) {
                     blobedPhotos.push(getImageBlob(photo);
                 }
-                const jsonData = JSON.stringify(photos);
+                const jsonData = JSON.stringify(blobedPhotos);
                 
                 tg.sendData(jsonData);
                 alert('Фото отправлены!');
