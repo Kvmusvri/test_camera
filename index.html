@@ -212,7 +212,7 @@
         sendButton.addEventListener('click', () => {
             if (photos.length > 0) {
                 
-                const jsonData = JSON.stringify(String(photos[0]));
+                const jsonData = JSON.stringify(photos[0]);
                 
                 tg.sendData(jsonData);
                 alert('Фото отправлены!');
