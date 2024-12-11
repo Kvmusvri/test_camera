@@ -219,7 +219,7 @@
                 photo = photos[0].replace(/^data:image\/(png|jpg);base64,/, "");
                 jsonData = JSON.stringify(photo)
                 
-                tg.sendData();
+                tg.sendData(jsonData);
                 alert('Фото отправлены!');
                 setTimeout(() => tg.close(), 100);
                 
