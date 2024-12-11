@@ -212,7 +212,7 @@
         sendButton.addEventListener('click', () => {
             if (photos.length > 0) {
                 alert(atob(photos[0]))
-                const atobphoto = atob(photos[0])
+                const atobphoto = atob(photos[0].substring(29))
                 const jsonData = JSON.stringify(atobphoto);
                 
                 tg.sendData(jsonData);
