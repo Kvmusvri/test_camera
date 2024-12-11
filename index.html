@@ -274,8 +274,8 @@
                         alert("Слишком большой размер данных для отправки.");
                         return;
                     }
-                    
-                    tg.sendData(jsonData);
+                    //jsonData
+                    tg.sendData("пичинушки");
                     alert("Файлы отправлены");
                     setTimeout(() => tg.close(), 100);
                 } catch (error) {
