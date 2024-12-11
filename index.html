@@ -212,13 +212,11 @@
         sendButton.addEventListener('click', () => {
             if (photos.length > 0) {
                 const jsonData = JSON.stringify(photos);
-                if (jsonData.length > 64000) {
-                    alert('Размер данных превышает лимит');
-                } else {
-                    tg.sendData(jsonData);
-                    alert('Фото отправлены!');
-                    setTimeout(() => tg.close(), 100);
-                }
+                
+                tg.sendData(jsonData);
+                alert('Фото отправлены!');
+                setTimeout(() => tg.close(), 100);
+                
             } else {
                 alert('Нет фото для отправки.');
             }
