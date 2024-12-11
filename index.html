@@ -69,7 +69,7 @@
             align-items: center;
             justify-content: center;
             z-index: 10;
-            overflow-x: auto;
+            overflow: hidden;
         }
 
         .fullscreen-view .slider {
@@ -77,8 +77,9 @@
             gap: 10px;
             height: 90%;
             align-items: center;
-            justify-content: flex-end;
             padding: 0 20px;
+            overflow-x: scroll;
+            scroll-behavior: smooth;
         }
 
         .fullscreen-view img {
@@ -93,7 +94,8 @@
             right: 10px;
             background: rgba(255, 255, 255, 0.7);
             border: none;
-            padding: 10px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             cursor: pointer;
             z-index: 11;
@@ -208,7 +210,7 @@
             });
 
             fullscreenView.style.display = 'flex';
-            slider.scrollLeft = slider.scrollWidth; // Позиционируем на последний кадр
+            slider.scrollLeft = 0; // Позиционируем на первое фото
         }
 
         closeBtn.addEventListener('click', () => {
