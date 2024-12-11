@@ -47,9 +47,14 @@
         }
 
         #send {
-            left: calc(50% - 90px);
-            transform: translateX(-50%);
-            background-color: rgba(0, 200, 100, 0.3);
+            left: calc(25% - 35px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(50, 150, 250, 0.8);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
         }
 
         .gallery {
@@ -101,20 +106,16 @@
             right: 10px;
             width: 40px;
             height: 40px;
-            background-color: rgba(255, 255, 255, 0.5);
+            background-color: rgba(255, 255, 255, 0.8);
             border: none;
             border-radius: 50%;
+            font-size: 20px;
+            font-weight: bold;
+            color: black;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            z-index: 11;
-        }
-
-        .close-btn::before {
-            content: '✕';
-            font-size: 20px;
-            color: black;
         }
     </style>
 </head>
@@ -122,85 +123,65 @@
 <body>
     <video id="video" autoplay playsinline muted></video>
     <div class="gallery" id="gallery"></div>
+    <button id="send">Отправить</button>
     <button id="snap"></button>
-    <button id="send"></button>
     <canvas id="canvas"></canvas>
     <img id="photo" alt="Сфотографированное изображение" style="display:none;">
 
     <div class="fullscreen-view" id="fullscreenView">
-        <button class="close-btn" id="closeBtn"></button>
+        <button class="close-btn" id="closeBtn">&times;</button>
         <img id="fullscreenImg" alt="Полноэкранное изображение">
     </div>
 
     <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const photo = document.getElementById('photo');
-        const gallery = document.getElementById('gallery');
-        const fullscreenView = document.getElementById('fullscreenView');
-        const fullscreenImg = document.getElementById('fullscreenImg');
-        const closeBtn = document.getElementById('closeBtn');
-        const sendBtn = document.getElementById('send');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const photo = document.getElementById('photo');
+    const gallery = document.getElementById('gallery');
+    const fullscreenView = document.getElementById('fullscreenView');
+    const fullscreenImg = document.getElementById('fullscreenImg');
+    const closeBtn = document.getElementById('closeBtn');
 
-        let photos = [];
-        let currentStream;
+    let currentStream;
 
-        async function startCamera(facingMode) {
-            if (currentStream) {
-                const tracks = currentStream.getTracks();
-                tracks.forEach(track => track.stop());
-            }
-            currentStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: facingMode,
-                    width: { min: 640, ideal: 1920 },
-                    height: { min: 480, ideal: 1080 },
-                    aspectRatio: 4 / 3,
-                    frameRate: { min: 20 }
-                }
-            });
-            video.srcObject = currentStream;
+    async function startCamera(facingMode) {
+        if (currentStream) {
+            const tracks = currentStream.getTracks();
+            tracks.forEach(track => track.stop());
         }
-
-        document.getElementById('snap').addEventListener('click', () => {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
-            let data = imgData.data;
-
-            // Повышение контрастности
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = clamp(data[i] * 1.2);
-                data[i + 1] = clamp(data[i + 1] * 1.2);
-                data[i + 2] = clamp(data[i + 2] * 1.2);
+        currentStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: facingMode,
+                width: { min: 640, ideal: 1920 },
+                height: { min: 480, ideal: 1080 },
+                aspectRatio: 4 / 3,
+                frameRate: { min: 20 }
             }
-
-            const sharpenedData = unsharpMask(imgData.data, canvas.width, canvas.height);
-            context.putImageData(new ImageData(sharpenedData, canvas.width, canvas.height), 0, 0);
-            photo.src = canvas.toDataURL();
-
-            photos.unshift(photo.src);
-            updateGallery();
         });
+        video.srcObject = currentStream;
+    }
 
-        sendBtn.addEventListener('click', () => {
-            const photosJSON = JSON.stringify({ photos });
-            console.log('Отправка данных:', photosJSON);
-            // Здесь можно добавить отправку на сервер через fetch
+    document.getElementById('snap').addEventListener('click', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const newImg = document.createElement('img');
+        newImg.src = canvas.toDataURL();
+        newImg.addEventListener('click', () => {
+            fullscreenImg.src = newImg.src;
+            fullscreenView.style.display = 'flex';
         });
+        gallery.appendChild(newImg);
+    });
 
-        function clamp(value) {
-            return Math.max(0, Math.min(255, value));
-        }
+    closeBtn.addEventListener('click', () => {
+        fullscreenView.style.display = 'none';
+    });
 
-        function unsharpMask(data, width, height) {
-            const kernel = [
-                [0, -1, 0],
-                [-1, 5, -1],
-                [0, -1, 0],
-            ];
+    startCamera('environment');
+    </script>
+</body>
 
-            const output = new Uint8Cl
+</html>
