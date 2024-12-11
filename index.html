@@ -218,8 +218,10 @@
 
                 photo = photos[0].replace(/^data:image\/(png|jpg);base64,/, "");
 
+                let durl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                
                 let data = {
-                    photo:photo
+                    durl: durl
                 }
 
                 jsonData = JSON.stringify(data)
