@@ -32,10 +32,6 @@
 
         button {
             border: none;
-            border-radius: 50%;
-            width: 70px;
-            height: 70px;
-            background-color: rgba(255, 255, 255, 0.3);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             cursor: pointer;
             position: absolute;
@@ -43,12 +39,26 @@
         }
 
         #snap {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
             left: 50%;
             transform: translateX(-50%);
         }
 
         #send {
-            left: calc(50% + 90px);
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            left: calc(50% - 110px);
         }
 
         .thumbnail {
@@ -123,7 +133,7 @@
     <video id="video" autoplay playsinline muted></video>
     <div class="thumbnail" id="thumbnail"></div>
     <button id="snap"></button>
-    <button id="send"></button>
+    <button id="send">Отправить</button>
     <canvas id="canvas"></canvas>
     <div class="fullscreen-view" id="fullscreenView">
         <button class="close-btn" id="closeBtn"></button>
