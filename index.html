@@ -216,8 +216,9 @@
         sendButton.addEventListener('click', () => {
             if (photos.length > 0) {
                 const latestPhoto = photos[0];
-                console.log('Отправка фото:', latestPhoto); // Здесь можно добавить отправку на сервер
-                alert('Фото отправлено!');
+                
+                tg.sendData(JSON.stringify(data))
+                tg.close()
             } else {
                 alert('Нет фото для отправки.');
             }
@@ -257,10 +258,12 @@
         }
 
         let data = {
-            photos = photos
+            photos: photos
         }
         
         startCamera('environment');
+
+        
     </script>
 </body>
 
