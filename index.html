@@ -218,9 +218,12 @@
 
                 photo = photos[0].replace(/^data:image\/(png|jpg);base64,/, "");
 
-                alert(photo)
-                jsonData = JSON.stringify(photo)
-                alert(jsonData)
+                let data = {
+                    photo:photo
+                }
+
+                jsonData = JSON.stringify(data)
+                
                 tg.sendData(jsonData);
                 alert('Фото отправлены!');
                 setTimeout(() => tg.close(), 100);
