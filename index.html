@@ -217,7 +217,7 @@
             updateThumbnail(photoUrl);
         });
 
-        sendButton.addEventListener('click', () => {
+        sendButton.addEventListener('click', async () => {
             if (photos.length > 0) {
                 try {
                     const base64Photos = [];
