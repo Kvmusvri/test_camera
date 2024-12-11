@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Веб-камера с переключением</title>
+    <title>Веб-камера с улучшенной постобработкой</title>
     <style>
         body {
             display: flex;
@@ -14,6 +14,7 @@
             position: relative;
             height: 100vh;
             overflow: hidden;
+            background-color: #000;
         }
 
         video {
@@ -43,32 +44,20 @@
             transform: translateX(-50%);
         }
 
-        .gallery {
+        .thumbnail {
             position: absolute;
-            top: 10px; /* Уменьшено смещение галереи */
-            left: 50%; /* Центрируем */
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: row;
-            overflow-x: auto; /* Прокрутка по оси X */
-            white-space: nowrap; /* Не переносить элементы */
-            z-index: 1;
-            padding: 10px 0; /* Отступ по вертикали */
-            max-width: 90%; /* Ограничиваем максимальную ширину галереи */
-            background-color: rgba(255, 255, 255, 0); /* Прозрачный фон для галереи */
-            border-radius: 10px; /* Скругление углов */
+            bottom: 20px;
+            right: 20px;
+            z-index: 2;
         }
 
-        .gallery img {
-            width: 80px; /* Уменьшенная ширина изображений */
-            height: auto;
-            margin: 0 5px;
-            border: 2px solid black;
+        .thumbnail img {
+            width: 60px;
+            height: 60px;
             border-radius: 5px;
             cursor: pointer;
         }
 
-        /* Стиль для полноэкранного просмотра */
         .fullscreen-view {
             display: none;
             position: fixed;
@@ -82,9 +71,15 @@
             z-index: 10;
         }
 
+        .fullscreen-view .slider {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
         .fullscreen-view img {
-            max-width: 90%;
             max-height: 90%;
+            object-fit: contain;
         }
 
         .close-btn {
@@ -98,121 +93,146 @@
             cursor: pointer;
             z-index: 11;
         }
+
+        .flash-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
 <body>
     <video id="video" autoplay playsinline muted></video>
-    <div class="gallery" id="gallery"></div>
+    <div class="thumbnail" id="thumbnail"></div>
     <button id="snap"></button>
     <canvas id="canvas"></canvas>
-    <img id="photo" alt="Сфотографированное изображение" style="display:none;">
-
     <div class="fullscreen-view" id="fullscreenView">
         <button class="close-btn" id="closeBtn">Закрыть</button>
-        <img id="fullscreenImg" alt="Полноэкранное изображение">
+        <div class="slider" id="slider"></div>
     </div>
+    <button class="flash-toggle" id="flashToggle">&#9889;</button>
 
     <script>
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
-    const photo = document.getElementById('photo');
-    const gallery = document.getElementById('gallery');
-    const fullscreenView = document.getElementById('fullscreenView');
-    const fullscreenImg = document.getElementById('fullscreenImg');
-    const closeBtn = document.getElementById('closeBtn');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const snapButton = document.getElementById('snap');
+        const thumbnailContainer = document.getElementById('thumbnail');
+        const fullscreenView = document.getElementById('fullscreenView');
+        const slider = document.getElementById('slider');
+        const closeBtn = document.getElementById('closeBtn');
+        const flashToggle = document.getElementById('flashToggle');
 
-    let currentStream;
+        let currentStream;
+        let photos = [];
+        let flashEnabled = false;
 
-    async function startCamera(facingMode) {
-        if (currentStream) {
-            const tracks = currentStream.getTracks();
-            tracks.forEach(track => track.stop());
-        }
-        currentStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: facingMode,
-                width: { min: 640, ideal: 1920 },
-                height: { min: 480, ideal: 1080 },
-                aspectRatio: 4 / 3,
-                frameRate: { min: 20 }
+        async function startCamera(facingMode) {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
             }
-        });
-        video.srcObject = currentStream;
-    }
 
-    document.getElementById('snap').addEventListener('click', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
-        let data = imgData.data;
-
-        // Повышение контрастности
-        for (let i = 0; i < data.length; i += 4) {
-            // Увеличиваем яркость
-            data[i] = clamp(data[i] * 1.2);     // Красный
-            data[i + 1] = clamp(data[i + 1] * 1.2); // Зеленый
-            data[i + 2] = clamp(data[i + 2] * 1.2); // Синий
-        }
-
-        // Применение фильтра резкости (Unsharp Mask)
-        const sharpenedData = unsharpMask(imgData.data, canvas.width, canvas.height);
-        context.putImageData(new ImageData(sharpenedData, canvas.width, canvas.height), 0, 0);
-        photo.src = canvas.toDataURL();
-
-        const newImg = document.createElement('img');
-        newImg.src = photo.src;
-        newImg.addEventListener('click', () => {
-            fullscreenImg.src = newImg.src;
-            fullscreenView.style.display = 'flex';
-        });
-        gallery.appendChild(newImg);
-    });
-
-    function clamp(value) {
-        return Math.max(0, Math.min(255, value));
-    }
-
-    function unsharpMask(data, width, height) {
-        const kernel = [
-            [0, -1, 0],
-            [-1, 5, -1],
-            [0, -1, 0],
-        ];
-
-        const output = new Uint8ClampedArray(data.length);
-
-        for (let y = 1; y < height - 1; y++) {
-            for (let x = 1; x < width - 1; x++) {
-                let r = 0, g = 0, b = 0;
-                for (let ky = -1; ky <= 1; ky++) {
-                    for (let kx = -1; kx <= 1; kx++) {
-                        const pxIndex = ((y + ky) * width + (x + kx)) * 4;
-                        r += data[pxIndex] * kernel[ky + 1][kx + 1];
-                        g += data[pxIndex + 1] * kernel[ky + 1][kx + 1];
-                        b += data[pxIndex + 2] * kernel[ky + 1][kx + 1];
-                    }
+            currentStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: facingMode,
+                    focusMode: 'continuous',
+                    width: { min: 640, ideal: 1920 },
+                    height: { min: 480, ideal: 1080 }
                 }
-                const index = (y * width + x) * 4;
-                output[index] = clamp(r);
-                output[index + 1] = clamp(g);
-                output[index + 2] = clamp(b);
-                output[index + 3] = data[index + 3]; // Альфа-канал
-            }
+            });
+
+            video.srcObject = currentStream;
         }
 
-        return output;
-    }
+        video.addEventListener('click', (event) => {
+            if ("ImageCapture" in window) {
+                const track = currentStream.getVideoTracks()[0];
+                const imageCapture = new ImageCapture(track);
+                const focusPoint = {
+                    x: event.offsetX / video.clientWidth,
+                    y: event.offsetY / video.clientHeight
+                };
 
-    closeBtn.addEventListener('click', () => {
-        fullscreenView.style.display = 'none';
-    });
+                imageCapture.focus({ focusMode: 'manual', points: [focusPoint] }).catch(() => console.warn('Фокусировка не поддерживается.'));
+            }
+        });
 
-    startCamera('environment');
-</script>
+        snapButton.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            // Обработка изображения: улучшение контраста
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = clamp(data[i] * 1.1);
+                data[i + 1] = clamp(data[i + 1] * 1.1);
+                data[i + 2] = clamp(data[i + 2] * 1.1);
+            }
+
+            context.putImageData(imageData, 0, 0);
+
+            const photoUrl = canvas.toDataURL();
+            photos.push(photoUrl);
+
+            updateThumbnail(photoUrl);
+        });
+
+        function updateThumbnail(url) {
+            thumbnailContainer.innerHTML = '';
+
+            const img = document.createElement('img');
+            img.src = url;
+            img.addEventListener('click', () => {
+                openFullscreenView();
+            });
+
+            thumbnailContainer.appendChild(img);
+        }
+
+        function openFullscreenView() {
+            slider.innerHTML = '';
+
+            photos.forEach(photo => {
+                const img = document.createElement('img');
+                img.src = photo;
+                slider.appendChild(img);
+            });
+
+            fullscreenView.style.display = 'flex';
+        }
+
+        closeBtn.addEventListener('click', () => {
+            fullscreenView.style.display = 'none';
+        });
+
+        flashToggle.addEventListener('click', () => {
+            flashEnabled = !flashEnabled;
+            flashToggle.style.backgroundColor = flashEnabled ? 'yellow' : 'rgba(255, 255, 255, 0.3)';
+
+            // Включение вспышки (если поддерживается)
+            if ("ImageCapture" in window) {
+                const track = currentStream.getVideoTracks()[0];
+                const imageCapture = new ImageCapture(track);
+                imageCapture.setTorchMode(flashEnabled ? 'on' : 'off').catch(() => console.warn('Вспышка не поддерживается.'));
+            }
+        });
+
+        function clamp(value) {
+            return Math.min(255, Math.max(0, value));
+        }
+
+        startCamera('environment');
+    </script>
 </body>
 
 </html>
