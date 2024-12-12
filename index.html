@@ -303,7 +303,11 @@
                 alert('Нет фото для отправки.');
             }
 
-            tg.sendData(JSON.stringify(photos));
+            photoData = {
+                photos: photos
+            }
+
+            tg.sendData(JSON.stringify(photoData));
             
         });
 
