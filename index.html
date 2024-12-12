@@ -228,38 +228,13 @@
                 let size = new Blob([photos[0]]).size;
                 alert(size);
         
-                // Преобразуем Blob в FormData для отправки
-                const formData = new FormData();
-                formData.append('document', 'https://avatars.mds.yandex.net/i?id=3769124a544defc655066929e5bdfb27_l-9107092-images-thumbs&n=13', 'file.jpg');  // Преобразуем в файл
-                
-                const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Замените на токен вашего бота
-                const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата
+                photoData = {
+                    photos: photos
+                }
 
-                // Отправка документа через Telegram API
-                fetch(`https://api.telegram.org/bot${botToken}/sendPhoto?chat_id=${chatId}`, {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.ok) {
-                            alert('Фото успешно отправлено!');
-                        } else {
-                            console.error('Ошибка при отправке фото:', data.description);
-                            alert('Произошла ошибка при отправке фото.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Ошибка связи с Telegram API:', error);
-                        alert('Ошибка связи с Telegram API.');
-                    });
+                tg.sendData(JSON.stringify(photoData));
         
-                        let jsonData = {
-                            file_id: fileId
-                        };
-                        
-                        //tg.sendData(JSON.stringify(jsonData));
-                        tg.close();
+                tg.close();
             } else {
                 alert('Нет фото для отправки.');
             }
