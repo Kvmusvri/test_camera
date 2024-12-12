@@ -270,39 +270,12 @@
                     photos: photos
                 }
 
-
-                const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Замените на ваш токен бота
-                //const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата или username
-                const chatId = '7334856780';
-                const message = 'Ваше сообщение'; // Сообщение, которое нужно отправить
-                
-                const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
-
                 sendPhotoToTelegram();
                 
                 alert(chatId);
                 
-                const data = {
-                  chat_id: chatId,
-                  text: message
-                };
                 
-                fetch(url, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(json => console.log(json))
-                .catch(error => console.error('Error:', error));
-                
-                photoData = {
-                    photos: photos
-                };
-                
-                tg.sendData(JSON.stringify(photoData));
+                //tg.sendData(JSON.stringify(photoData));
         
                 tg.close();
             } else {
