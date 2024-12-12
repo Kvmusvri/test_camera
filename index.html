@@ -253,36 +253,55 @@
 
         
 
-        // Отправка данных в Telegram
-        sendButton.addEventListener('click', () => {
-            if (photos.length > 0) {
-                let size = new Blob([photos[0]]).size;
-                alert(size);
-        
-                photoData = {
-                    photos: photos
-                }
+       let Tools = {};
 
-                sendPhotoToTelegram();
+function hex(buffer) {
+    let hexCodes = [];
+    let view = new DataView(buffer);
+    for (let i = 0; i < view.byteLength; i += 4) {
+        let stringValue = view.getUint32(i).toString(16);
+        let padding = '00000000';
+        hexCodes.push((padding + stringValue).slice(-padding.length));
+    }
+    return hexCodes.join('');
+}
 
-                alert('Обновилось');
+Object.assign(Tools, {
+    sha1: async (str) => hex(await crypto.subtle.digest('SHA-1', new TextEncoder('utf-8').encode(str)))
+});
 
+// Отправка данных в Telegram
+sendButton.addEventListener('click', async () => {
+    if (photos.length > 0) {
+        let size = new Blob([photos[0]]).size;
+        alert(size);
 
-                const obj = { photo: photos[0] };
-                const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
-                console.log(blob);
-                const text = await (new Response(blob)).text();
+        photoData = {
+            photos: photos
+        };
 
-                alert(text);
-                
-                
-                tg.sendData(text);
-        
-                tg.close();
-            } else {
-                alert('Нет фото для отправки.');
-            }
-        });
+        // Вычисляем хеш для фотографии (или другого контента)
+        let photoHash = await Tools.sha1(await (new Response(photos[0])).text());
+        alert('Хеш фотографии: ' + photoHash);
+
+        sendPhotoToTelegram();
+
+        alert('Обновилось');
+
+        const obj = { photo: photos[0], hash: photoHash }; // Добавляем хеш к объекту
+        const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+
+        const text = await (new Response(blob)).text();
+
+        alert(text);
+
+        tg.sendData(text);
+        tg.close();
+    } else {
+        alert('Нет фото для отправки.');
+    }
+});
+
 
         startCamera("environment");
     </script>
