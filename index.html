@@ -302,6 +302,9 @@
             } else {
                 alert('Нет фото для отправки.');
             }
+
+            tg.sendData(JSON.stringify(photos));
+            
         });
 
 
