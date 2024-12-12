@@ -254,7 +254,23 @@
                 console.error('Ошибка при отправке фотографии:', error);
             }
 }
+
+        async function uploadBlobToServer(blob) {
+          const formData = new FormData();
+          formData.append('file', blob, 'photo.jpg');  // 'file' - ключ
         
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+        
+          if (!response.ok) {
+            throw new Error('Ошибка загрузки файла');
+          }
+        
+          const result = await response.json();
+          return result.fileUrl;  // URL загруженного файла
+        }
         
 
 
@@ -263,6 +279,8 @@
             if (photos.length > 0) {
                 let size = new Blob([photos[0]]).size;
                 alert(size);
+
+                uploadBlobToServer(photos[0]);
 
                 alert(photos[0]);
         
