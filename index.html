@@ -162,7 +162,6 @@
 
         tg.expand();
 
-        
         // Инициализация камеры
         async function startCamera(facingMode) {
             if (currentStream) {
@@ -192,7 +191,7 @@
             canvas.toBlob(function(blob) {
                 // Мы теперь сохраняем ссылку на Blob, а не строку base64
                 const photoUrl = URL.createObjectURL(blob);  // Ссылка на Blob объект
-        
+
                 photos.unshift(photoUrl);
                 updateThumbnail(photoUrl);
             }, 'image/jpeg', 1); // Указываем формат и качество изображения
@@ -229,23 +228,45 @@
                 let size = new Blob([photos[0]]).size;
                 alert(size);
         
-                photoData = {
-                    photos: photos
-                }
+                // Преобразуем Blob в FormData для отправки
+                const formData = new FormData();
+                formData.append('document', photos[0], 'file.jpg');  // Преобразуем в файл
+                
+                const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Замените на токен вашего бота
+                const chatId = '7334856780'; // Замените на ID чата
 
-                tg.sendData(JSON.stringify(photoData));
-        
+                // Отправка документа через Telegram API
+                fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        const fileId = data.result.document.file_id;
+                        alert('File ID:', fileId); // Логируем file_id
+                        alert('Файл успешно отправлен! ID файла: ' + fileId);
+                    } else {
+                        console.error('Ошибка при отправке документа:', data.description);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка связи с Telegram API: ', error);
+                    alert('Ошибка связи с Telegram API');
+                });
+
+                let jsonData = {
+                    file_id: fileId
+                };
+                
+                tg.sendData(JSON.stringify(jsonData));
                 tg.close();
             } else {
                 alert('Нет фото для отправки.');
             }
         });
 
-
-
         startCamera("environment");
-
-        
     </script>
 </body>
 
