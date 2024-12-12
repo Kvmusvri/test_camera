@@ -220,6 +220,10 @@
 
         // Функция для отправки медиа-группы
         async function sendMediaGroup() {
+            const botToken  = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0';  // Ваш токен бота
+            const chatId = tg.initDataUnsafe.user.id;  // ID чата, куда отправлять сообщение
+            const message = 'Привет, это сообщение от моего бота!';  // Сообщение, которое нужно отправить
+
             const media = photos.map(url => ({
                 type: 'photo', // Тип медиа: фото
                 media: url      // Data URL
