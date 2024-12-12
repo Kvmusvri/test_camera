@@ -223,43 +223,19 @@
             fullscreenView.style.display = 'none';
         });
 
-
         // Отправка данных в Telegram
-        // Конвертация Blob в Base64
-        function blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result.split(',')[1]); // Убираем префикс "data:<type>;base64,"
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
-        }
-
-        // Обработчик кнопки отправки данных в Telegram
-        sendButton.addEventListener('click', async () => {
+        sendButton.addEventListener('click', () => {
             if (photos.length > 0) {
-                try {
-                    // Конвертация всех фото в массив строк Base64
-                    const base64Photos = await Promise.all(
-                        photos.map(async (photo) => {
-                            const response = await fetch(photo); // Получаем Blob из blob-ссылки
-                            const blob = await response.blob();
-                            return await blobToBase64(blob); // Конвертация Blob в Base64
-                        })
-                    );
+                let size = new Blob([photos[0]]).size;
+                alert(size);
         
-                    // Формируем JSON для отправки
-                    const photoData = {
-                        photos: base64Photos
-                    };
-        
-                    // Отправляем данные в Telegram
-                    tg.sendData(JSON.stringify(photoData));
-                    tg.close(); // Закрываем Web App после отправки данных
-                } catch (error) {
-                    alert(error);
-                    alert('Ошибка при отправке фото.');
+                photoData = {
+                    photos: photos
                 }
+
+                tg.sendData(JSON.stringify(photoData));
+        
+                tg.close();
             } else {
                 alert('Нет фото для отправки.');
             }
