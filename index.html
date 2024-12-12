@@ -262,6 +262,8 @@
                     media: new File([dataUrlToBlob(dataUrl)], `photo${index + 1}.jpg`, { type: 'image/jpeg' })
                   };
                 });
+
+                alert(files);
                 
                 // Отправка фотографий через sendMediaGroup
                 const formData = new FormData();
@@ -270,11 +272,15 @@
                   type: file.type,
                   media: `attach://photo${index + 1}`
                 }))));
+
+                alert(formData);
                 
                 // Добавляем файлы в formData
                 files.forEach((file, index) => {
                   formData.append(`photo${index + 1}`, file.media);
                 });
+
+                alert(files);
                 
                 // URL для отправки
                 const url = `https://api.telegram.org/bot${token}/sendMediaGroup`;
