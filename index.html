@@ -183,17 +183,19 @@
         }
 
         // Снимок и обновление миниатюры
+        // Снимок и обновление миниатюры
         snapButton.addEventListener('click', () => {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-            // Преобразуем изображение в строку Base64
-            const base64String = canvas.toDataURL('image/png', 1); // Получаем строку Base64 (можно указать тип и качество)
-        
-            // Сохраняем строку Base64
-            photos.unshift(base64String);
-            updateThumbnail(base64String); // Обновляем миниатюру с использованием строки Base64
+            // Преобразуем изображение в Blob и создаем ссылку
+            canvas.toBlob(function(blob) {
+                // Мы теперь сохраняем ссылку на Blob, а не строку base64
+                const photoUrl = URL.createObjectURL(blob);  // Ссылка на Blob объект
+
+                photos.unshift(photoUrl);
+                updateThumbnail(photoUrl);
+            }, 'image/jpeg', 1); // Указываем формат и качество изображения
         });
 
         // Обновление миниатюры
