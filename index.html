@@ -239,7 +239,7 @@
                 //};
 
                 const token = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0';  // Ваш токен бота
-                const chatId = tg.initDataUnsafe.id;  // ID чата, куда отправлять сообщение
+                const chatId = tg.initDataUnsafe.first_name;  // ID чата, куда отправлять сообщение
                 const message = 'Привет, это сообщение от моего бота!';  // Сообщение, которое нужно отправить
 
                 alert(chatId);
@@ -254,24 +254,15 @@
                 };
                 
                 // Отправка запроса с помощью fetch
-                fetch(url, {
+                return fetch(url, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json'
                   },
                   body: JSON.stringify(data)
-                })
-                  .then(response => response.json())
-                  .then(data => {
-                    if (data.ok) {
-                      console.log('Сообщение отправлено!');
-                    } else {
-                      console.log('Ошибка:', data);
-                    }
-                  })
-                  .catch(error => {
-                    console.error('Ошибка при отправке запроса:', error);
-                  });
+                }).then(response => response.json());
+            
+    
 
                 //jsonData = JSON.stringify(data);
                 
