@@ -234,14 +234,47 @@
                 
                 alert(size);
                 
-                let data = {
-                    photos: photos,
-                };
+                //let data = {
+                //    photos: photos,
+                //};
 
-                jsonData = JSON.stringify(data);
+                const token = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0';  // Ваш токен бота
+                const chatId = tg.WebAppChat.id;  // ID чата, куда отправлять сообщение
+                const message = 'Привет, это сообщение от моего бота!';  // Сообщение, которое нужно отправить
                 
-                tg.shareMessage(jsonData);
-                alert('Фото отправлены!');
+                // URL для API Telegram
+                const url = `https://api.telegram.org/bot${token}/sendMessage`;
+                
+                // Данные для отправки
+                const data = {
+                  chat_id: chatId,
+                  text: message
+                };
+                
+                // Отправка запроса с помощью fetch
+                fetch(url, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(data)
+                })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.ok) {
+                      console.log('Сообщение отправлено!');
+                    } else {
+                      console.log('Ошибка:', data);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Ошибка при отправке запроса:', error);
+                  });
+
+                //jsonData = JSON.stringify(data);
+                
+                //tg.shareMessage(jsonData);
+                //alert('Фото отправлены!');
                 setTimeout(() => tg.close(), 100);
                 
             } else {
