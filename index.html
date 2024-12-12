@@ -264,18 +264,12 @@
                 }
 
                 sendPhotoToTelegram();
-                
-                const url = URL.createObjectURL(photos[0]);
-                //const xmlRequest = new XMLHttpRequest();
-                //xmlRequest.open('GET', url, false);
-                //xmlRequest.send();
-                //URL.revokeObjectURL();
-                //const jsonData = JSON.parse(xmlRequest.responseText);
 
-                alert(url);
+                let file = new File([photos[0]], "file");
+
                 
                 
-                tg.sendData(JSON.stringify(url));
+                tg.sendData(JSON.stringify(file));
         
                 tg.close();
             } else {
