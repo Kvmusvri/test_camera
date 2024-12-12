@@ -3,29 +3,27 @@ import path from 'path';
 
 export const config = {
     api: {
-        bodyParser: false, // Отключаем автоматический парсер тела запроса
+        bodyParser: false,
     },
 };
 
-const uploadsDir = path.join(process.cwd(), 'public/uploads');
-
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { createWriteStream } = await import('fs');
-        const formidable = await import('formidable');
+        const { IncomingForm } = await import('formidable');
 
-        const form = new formidable.IncomingForm();
+        const form = new IncomingForm();
+        const uploadsDir = path.join(process.cwd(), 'public/uploads');
+
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+
         form.uploadDir = uploadsDir;
         form.keepExtensions = true;
 
         form.parse(req, (err, fields, files) => {
             if (err) {
-                res.status(500).json({ error: 'Ошибка загрузки файла' });
-                return;
+                return res.status(500).json({ error: 'Ошибка обработки файла' });
             }
 
             const file = files.image;
