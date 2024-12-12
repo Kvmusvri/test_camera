@@ -183,19 +183,18 @@
         }
 
         // Снимок и обновление миниатюры
-        // Снимок и обновление миниатюры
         snapButton.addEventListener('click', () => {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            // Преобразуем изображение в Blob и создаем ссылку
-            // Получаем Blob изображение
+
             canvas.toBlob((blob) => {
-              setPhotoBlob(blob);
-              const url = URL.createObjectURL(blob);
-              setPhotoUrl(url);
+                // Создаем URL для изображения и обновляем миниатюру
+                const url = URL.createObjectURL(blob);
+                photos.push(url); // Сохраняем ссылку на изображение
+                updateThumbnail(url); // Обновляем миниатюру
             }, "image/jpeg");
-          });
+        });
         
 
         // Обновление миниатюры
