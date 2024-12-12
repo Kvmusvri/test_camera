@@ -3,7 +3,7 @@ import path from 'path';
 
 export const config = {
     api: {
-        bodyParser: false,
+        bodyParser: false,  // Отключаем автоматический парсер тела запроса
     },
 };
 
@@ -12,13 +12,13 @@ export default async function handler(req, res) {
         const { IncomingForm } = await import('formidable');
 
         const form = new IncomingForm();
-        const uploadsDir = path.join(process.cwd(), 'public/uploads');
+        const tempDir = path.join('/tmp', 'uploads');
 
-        if (!fs.existsSync(uploadsDir)) {
-            fs.mkdirSync(uploadsDir, { recursive: true });
+        if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true });
         }
 
-        form.uploadDir = uploadsDir;
+        form.uploadDir = tempDir;
         form.keepExtensions = true;
 
         form.parse(req, (err, fields, files) => {
@@ -30,7 +30,16 @@ export default async function handler(req, res) {
             const filename = path.basename(file.filepath);
             const fileUrl = `/uploads/${filename}`;
 
-            res.status(200).json({ url: fileUrl });
+            // Перемещаем файл в директорию public, чтобы он стал доступен
+            const publicPath = path.join(process.cwd(), 'public', 'uploads', filename);
+
+            fs.rename(file.filepath, publicPath, (err) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Ошибка сохранения файла на сервере' });
+                }
+
+                res.status(200).json({ url: fileUrl });
+            });
         });
     } else {
         res.status(405).json({ error: 'Метод не поддерживается' });
