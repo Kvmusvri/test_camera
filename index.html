@@ -238,6 +238,8 @@
                 const message = 'Ваше сообщение'; // Сообщение, которое нужно отправить
                 
                 const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+                alert(chatId);
                 
                 const data = {
                   chat_id: chatId,
