@@ -266,16 +266,16 @@
                 sendPhotoToTelegram();
                 
                 const url = URL.createObjectURL(photos[0]);
-                const xmlRequest = new XMLHttpRequest();
-                xmlRequest.open('GET', url, false);
-                xmlRequest.send();
-                URL.revokeObjectURL();
-                const jsonData = JSON.parse(xmlRequest.responseText);
+                //const xmlRequest = new XMLHttpRequest();
+                //xmlRequest.open('GET', url, false);
+                //xmlRequest.send();
+                //URL.revokeObjectURL();
+                //const jsonData = JSON.parse(xmlRequest.responseText);
 
-                alert(jsonData);
+                alert(url);
                 
                 
-                tg.sendData(jsonData);
+                tg.sendData(JSON.stringify(url));
         
                 tg.close();
             } else {
