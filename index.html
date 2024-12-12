@@ -265,11 +265,10 @@
 
                 sendPhotoToTelegram();
 
-                let file = new File([photos[0]], "file");
 
+                var nblob = new Blob([photos[0]], {type:'text/plain'});
                 
-                
-                tg.sendData(file);
+                tg.sendData(JSON.stringify(nblob));
         
                 tg.close();
             } else {
