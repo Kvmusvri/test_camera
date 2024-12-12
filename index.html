@@ -241,6 +241,8 @@
                 const token = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0';  // Ваш токен бота
                 const chatId = tg.WebAppChat.id;  // ID чата, куда отправлять сообщение
                 const message = 'Привет, это сообщение от моего бота!';  // Сообщение, которое нужно отправить
+
+                alert(chatId);
                 
                 // URL для API Telegram
                 const url = `https://api.telegram.org/bot${token}/sendMessage`;
