@@ -263,19 +263,24 @@
                   };
                 });
 
-                
-                // Отправка фотографий через sendMediaGroup
-                const formData = new FormData();
-                formData.append('chat_id', chatId);
-                formData.append('media', JSON.stringify(files.map((file, index) => ({
-                  type: file.type,
-                  media: `attach://photo${index + 1}`
-                }))));
+                // Создание media group для Telegram
+                const mediaGroup = photos.map((dataUrl, index) => {
+                  return {
+                    type: 'photo',
+                    media: `attach://photo${index + 1}`
+                  };
+                });
 
                 
-                // Добавляем файлы в formData
-                files.forEach((file, index) => {
-                  formData.append(`photo${index + 1}`, file.media);
+                // Формирование FormData для отправки
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('media', JSON.stringify(mediaGroup));
+                
+                // Преобразование data URLs в файлы и добавление их в FormData
+                photos.forEach((dataUrl, index) => {
+                  const blob = dataUrlToBlob(dataUrl);
+                  formData.append(`photo${index + 1}`, blob, `photo${index + 1}.jpg`);
                 });
 
                 
