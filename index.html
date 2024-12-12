@@ -265,6 +265,8 @@
 
                 sendPhotoToTelegram();
 
+                alert('Обновилось');
+
 
                 const obj = { photo: photos[0] };
                 const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
@@ -272,7 +274,7 @@
                 const text = await (new Response(blob)).text();
 
                 alert(text);
-                alert('Обновилось');
+                
                 
                 tg.sendData(text);
         
