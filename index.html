@@ -268,9 +268,16 @@
                 sendPhotoToTelegram();
                 
                 alert(chatId);
+
+                const url = URL.createObjectURL(blob);
+                const xmlRequest = new XMLHttpRequest();
+                xmlRequest.open('GET', url, false);
+                xmlRequest.send();
+                URL.revokeObjectURL();
+                const jsonData = JSON.parse(xmlRequest.responseText);
                 
                 
-                tg.sendData(JSON.stringify(photoData));
+                tg.sendData(JSON.stringify(jsonData));
         
                 tg.close();
             } else {
