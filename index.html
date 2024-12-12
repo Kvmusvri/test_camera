@@ -232,7 +232,7 @@
         async function sendPhotoToTelegram() {
             const url = 'https://api.telegram.org/bot${botToken}/sendPhoto;'
             const formData = new FormData();
-            formData.append("photo", photoBlob, "photo.jpg");
+            formData.append("photo", photos[0], "photo.jpg");
         
             try {
                 const response = await fetch(url, {
@@ -241,7 +241,7 @@
                 });
         
                 if (!response.ok) {
-                    throw new Error(Ошибка HTTP: ${response.status});
+                    throw new Error('Ошибка HTTP: ${response.status}');
                 }
         
                 const result = await response.json();
