@@ -222,27 +222,24 @@
             fullscreenView.style.display = 'none';
         });
 
-        async function sendPhotoToTelegram() {
-            
+        const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Замените на токен вашего бота
+        const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата, куда отправлять сообщение
+        const photoUrl = 'https://i.pinimg.com/originals/cd/64/4d/cd644dbadeb1bdc70eef86e8d4df6ebe.png'; // URL фотографии, которую вы хотите отправить
 
-            const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Замените на токен вашего бота
-            const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата, куда отправлять сообщение
-            const photoUrl = 'https://i.pinimg.com/originals/cd/64/4d/cd644dbadeb1bdc70eef86e8d4df6ebe.png'; // URL фотографии, которую вы хотите отправить
+       const photoBlob = new Blob([photos[0]], { type: 'image/jpeg' }); // Blob-ссылка на изображение
+
+        async function sendPhotoToTelegram() {
             const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
         
-            const data = {
-                chat_id: chatId,
-                photo: photoUrl, // Ссылка на фотографию
-                caption: 'Вот ваша фотография!' // Подпись к фотографии
-            };
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('photo', photoBlob, 'image.jpg'); // Передаем Blob как файл с именем 'image.jpg'
+            formData.append('caption', 'Вот ваша фотография!'); // Подпись
         
             try {
                 const response = await fetch(url, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
+                    body: formData
                 });
         
                 if (!response.ok) {
