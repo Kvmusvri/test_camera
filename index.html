@@ -222,22 +222,39 @@
             fullscreenView.style.display = 'none';
         });
 
-        const sendPhoto = async () => {
-            const axios = require('axios');
-            const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Ваш токен бота
-            const chatId = tg.initDataUnsafe.user.id'; // Замените на ваш ID чата
-            const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+        async function sendPhotoToTelegram() {
             
+
+            const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Замените на токен вашего бота
+            const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата, куда отправлять сообщение
+            const photoUrl = 'https://i.pinimg.com/originals/cd/64/4d/cd644dbadeb1bdc70eef86e8d4df6ebe.png'; // URL фотографии, которую вы хотите отправить
+            const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+        
+            const data = {
+                chat_id: chatId,
+                photo: photoUrl, // Ссылка на фотографию
+                caption: 'Вот ваша фотография!' // Подпись к фотографии
+            };
+        
             try {
-                const response = await axios.post(url, {
-                    chat_id: chatId,
-                    photo: 'https://i.pinimg.com/originals/cd/64/4d/cd644dbadeb1bdc70eef86e8d4df6ebe.png'
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
                 });
-                console.log('Фото отправлено успешно:', response.data);
+        
+                if (!response.ok) {
+                    throw new Error(`Ошибка HTTP: ${response.status}`);
+                }
+        
+                const result = await response.json();
+                console.log('Фотография успешно отправлена:', result);
             } catch (error) {
-                console.error('Ошибка при отправке фото:', error.response?.data || error.message);
+                console.error('Ошибка при отправке фотографии:', error);
             }
-        };
+        }
         
         
 
@@ -257,11 +274,11 @@
                 const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата или username
                 const message = 'Ваше сообщение'; // Сообщение, которое нужно отправить
                 
-                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
 
+                sendPhotoToTelegram();
+                
                 alert(chatId);
-
-                sendPhoto();
                 
                 const data = {
                   chat_id: chatId,
