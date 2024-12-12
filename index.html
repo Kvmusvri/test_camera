@@ -243,12 +243,12 @@
         
                 const result = await response.json();
                 if (result.ok) {
-                    console.log('Медиа-группа успешно отправлена!');
+                    alert('Медиа-группа успешно отправлена!');
                 } else {
-                    console.error('Ошибка при отправке:', result);
+                    alert('Ошибка при отправке:', result);
                 }
             } catch (error) {
-                console.error('Ошибка сети:', error);
+                alert('Ошибка сети:', error);
             }
         }
 
