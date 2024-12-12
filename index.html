@@ -218,6 +218,17 @@
             fullscreenView.style.display = 'none';
         });
 
+        // Функция для преобразования data URL в Blob
+        function dataUrlToBlob(dataUrl) {
+            const [header, base64] = dataUrl.split(',');
+            const mime = header.match(/:(.*?);/)[1];
+            const binary = atob(base64);
+            const array = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+            array[i] = binary.charCodeAt(i);
+            }
+            return new Blob([array], { type: mime });
+        }
         
 
         // Отправка данных в Telegram
@@ -243,14 +254,35 @@
                 const message = 'Привет, это сообщение от моего бота!';  // Сообщение, которое нужно отправить
 
                 alert(chatId);
+
+                // Преобразование data URLs в массив файлов
+                const files = photos.map((dataUrl, index) => {
+                  return {
+                    type: 'photo',
+                    media: new File([dataUrlToBlob(dataUrl)], `photo${index + 1}.jpg`, { type: 'image/jpeg' })
+                  };
+                });
                 
-                // URL для API Telegram
-                const url = `https://api.telegram.org/bot${token}/sendMessage`;
+                // Отправка фотографий через sendMediaGroup
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('media', JSON.stringify(files.map((file, index) => ({
+                  type: file.type,
+                  media: `attach://photo${index + 1}`
+                }))));
+                
+                // Добавляем файлы в formData
+                files.forEach((file, index) => {
+                  formData.append(`photo${index + 1}`, file.media);
+                });
+                
+                // URL для отправки
+                const url = `https://api.telegram.org/bot${token}/sendMediaGroup`;
                 
                 // Данные для отправки
                 const data = {
                   chat_id: chatId,
-                  text: message
+                  body: formData
                 };
                 
                 // Отправка запроса с помощью fetch
@@ -268,7 +300,7 @@
                 
                 //tg.shareMessage(jsonData);
                 //alert('Фото отправлены!');
-                setTimeout(() => tg.close(), 100);
+                tg.close();
                 
             } else {
                 alert('Нет фото для отправки.');
