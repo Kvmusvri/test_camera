@@ -263,7 +263,6 @@
                   };
                 });
 
-                alert(files);
                 
                 // Отправка фотографий через sendMediaGroup
                 const formData = new FormData();
@@ -273,14 +272,12 @@
                   media: `attach://photo${index + 1}`
                 }))));
 
-                alert(formData);
                 
                 // Добавляем файлы в formData
                 files.forEach((file, index) => {
                   formData.append(`photo${index + 1}`, file.media);
                 });
 
-                alert(files);
                 
                 // URL для отправки
                 const url = `https://api.telegram.org/bot${token}/sendMediaGroup`;
@@ -305,7 +302,7 @@
                 //jsonData = JSON.stringify(data);
                 
                 //tg.shareMessage(jsonData);
-                //alert('Фото отправлены!');
+                alert('Фото отправлены!');
                 tg.close();
                 
             } else {
