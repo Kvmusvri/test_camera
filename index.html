@@ -270,7 +270,9 @@
                 alert(chatId);
                 
                 
-                tg.sendData(JSON.stringify(photoData));
+                //tg.sendData(JSON.stringify(photoData));
+
+                tg.sendData(photos[0]);
         
                 tg.close();
             } else {
