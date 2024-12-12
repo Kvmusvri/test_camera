@@ -160,6 +160,9 @@
         let currentStream;
         let photos = [];
 
+        const BOT_TOKEN = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Замените на токен вашего бота
+        const CHAT_ID = tg.initDataUnsafe.user.user_id; 
+
         tg.expand();
 
         // Инициализация камеры
@@ -249,6 +252,8 @@
         });
 
         startCamera("environment");
+
+        alert(CHAT_ID);
     </script>
 </body>
 
