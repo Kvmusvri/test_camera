@@ -270,8 +270,10 @@
                 const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
                 console.log(blob);
                 const text = await (new Response(blob)).text();
+
+                alert(text)
                 
-                tg.sendData(JSON.stringify(text));
+                tg.sendData(text);
         
                 tg.close();
             } else {
