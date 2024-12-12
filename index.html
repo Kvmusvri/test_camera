@@ -235,7 +235,7 @@
         
             const formData = new FormData();
             formData.append('chat_id', chatId);
-            formData.append('photo', 'https://i.pinimg.com/originals/cd/64/4d/cd644dbadeb1bdc70eef86e8d4df6ebe.png'); // Передаем строку Base64 как фотографию
+            formData.append('photo', photos[0]); // Передаем строку Base64 как фотографию
             formData.append('caption', 'Вот ваша фотография!'); // Подпись (необязательно)
         
             try {
