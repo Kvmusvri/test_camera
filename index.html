@@ -271,7 +271,8 @@
                 console.log(blob);
                 const text = await (new Response(blob)).text();
 
-                alert(text)
+                alert(text);
+                alert('Обновилось');
                 
                 tg.sendData(text);
         
