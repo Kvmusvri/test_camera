@@ -257,7 +257,7 @@
                     tg.sendData(JSON.stringify(photoData));
                     tg.close(); // Закрываем Web App после отправки данных
                 } catch (error) {
-                    alert('Ошибка при обработке фото:', error);
+                    alert(error);
                     alert('Ошибка при отправке фото.');
                 }
             } else {
