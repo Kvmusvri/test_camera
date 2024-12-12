@@ -266,9 +266,12 @@
                 sendPhotoToTelegram();
 
 
-                var nblob = new Blob([photos[0]], {type:'text/plain'});
+                const obj = { photo: photos[0] };
+                const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+                console.log(blob);
+                const text = await (new Response(blob)).text();
                 
-                tg.sendData(JSON.stringify(nblob));
+                tg.sendData(JSON.stringify(text));
         
                 tg.close();
             } else {
