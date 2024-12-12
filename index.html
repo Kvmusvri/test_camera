@@ -220,14 +220,14 @@
 
         // Функция для преобразования data URL в Blob
         function dataUrlToBlob(dataUrl) {
-            const [header, base64] = dataUrl.split(',');
-            const mime = header.match(/:(.*?);/)[1];
-            const binary = atob(base64);
-            const array = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
+          const [header, base64] = dataUrl.split(',');
+          const mime = header.match(/:(.*?);/)[1];
+          const binary = atob(base64);
+          const array = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) {
             array[i] = binary.charCodeAt(i);
-            }
-            return new Blob([array], { type: mime });
+          }
+          return new Blob([array], { type: mime });
         }
         
 
@@ -255,52 +255,23 @@
 
                 alert(chatId);
 
-                // Преобразование data URLs в массив файлов
-                const files = photos.map((dataUrl, index) => {
-                  return {
-                    type: 'photo',
-                    media: new File([dataUrlToBlob(dataUrl)], `photo${index + 1}.jpg`, { type: 'image/jpeg' })
-                  };
-                });
+                const blob = dataUrlToBlob(photoDataUrl);
 
-                // Создание media group для Telegram
-                const mediaGroup = photos.map((dataUrl, index) => {
-                  return {
-                    type: 'photo',
-                    media: `attach://photo${index + 1}`
-                  };
-                });
-
-                
-                // Формирование FormData для отправки
                 const formData = new FormData();
                 formData.append('chat_id', chatId);
-                formData.append('media', JSON.stringify(mediaGroup));
+                formData.append('photo', blob, 'photo.jpg');
                 
-                // Преобразование data URLs в файлы и добавление их в FormData
-                photos.forEach((dataUrl, index) => {
-                  const blob = dataUrlToBlob(dataUrl);
-                  formData.append(`photo${index + 1}`, blob, `photo${index + 1}.jpg`);
-                });
-
-                
-                // URL для отправки
-                const url = `https://api.telegram.org/bot${token}/sendMediaGroup`;
-                
-                // Данные для отправки
-                const data = {
-                  chat_id: chatId,
-                  body: formData
-                };
-                
-                // Отправка запроса с помощью fetch
-                return fetch(url, {
+                fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
                   method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(data)
-                }).then(response => response.json());
+                  body: formData
+                })
+                  .then(response => response.json())
+                  .then(data => {
+                    console.log('Ответ Telegram API:', data);
+                  })
+                  .catch(error => {
+                    console.error('Ошибка:', error);
+                  });
             
     
 
