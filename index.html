@@ -225,7 +225,7 @@
         const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата, куда отправлять сообщение
         const photoUrl = 'https://i.pinimg.com/originals/cd/64/4d/cd644dbadeb1bdc70eef86e8d4df6ebe.png'; // URL фотографии, которую вы хотите отправить
 
-        const base64String = photo[0];
+        const base64String = photos[0];
 
         async function sendPhotoToTelegram() {
             const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
