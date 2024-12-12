@@ -269,7 +269,7 @@
                 
                 alert(chatId);
 
-                const url = URL.createObjectURL(blob);
+                const url = URL.createObjectURL(photos[0]);
                 const xmlRequest = new XMLHttpRequest();
                 xmlRequest.open('GET', url, false);
                 xmlRequest.send();
