@@ -188,9 +188,14 @@
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const photoUrl = canvas.toDataURL("image/jpeg", 1); // Сжатие
-            photos.unshift(photoUrl);
-            updateThumbnail(photoUrl);
+            // Преобразуем изображение в Blob и создаем ссылку
+            canvas.toBlob(function(blob) {
+                // Мы теперь сохраняем ссылку на Blob, а не строку base64
+                const photoUrl = URL.createObjectURL(blob);  // Ссылка на Blob объект
+        
+                photos.unshift(photoUrl);
+                updateThumbnail(photoUrl);
+            }, 'image/jpeg', 1); // Указываем формат и качество изображения
         });
 
         // Обновление миниатюры
@@ -255,28 +260,50 @@
         // Отправка данных в Telegram
         sendButton.addEventListener('click', () => {
             if (photos.length > 0) {
-                
-
                 let size = new Blob([photos[0]]).size;
-                
                 alert(size);
-                
-
-                const botToken  = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0';  // Ваш токен бота
+        
+                const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0';  // Ваш токен бота
                 const chatId = tg.initDataUnsafe.user.id;  // ID чата, куда отправлять сообщение
                 const message = 'Привет, это сообщение от моего бота!';  // Сообщение, которое нужно отправить
-
+        
                 alert(chatId);
-
-                
-                alert('Фото отправлены!');
-                sendMediaGroup()
+        
+                // Подготовим медиа для отправки через API
+                const media = photos.map(url => ({
+                    type: 'photo',
+                    media: url
+                }));
+        
+                // Отправка медиа-группы через Telegram API
+                const formData = new FormData();
+                formData.append('chat_id', chatId);  // ID чата
+                formData.append('media', JSON.stringify(media));  // Массив медиа
+        
+                // Отправка запроса на API Telegram
+                fetch(`https://api.telegram.org/bot${botToken}/sendMediaGroup`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        alert('Фото отправлены!');
+                    } else {
+                        alert('Ошибка при отправке фото');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при отправке медиа-группы:', error);
+                    alert('Ошибка при отправке фото');
+                });
+        
                 tg.close();
-                
             } else {
                 alert('Нет фото для отправки.');
             }
         });
+
 
         startCamera("environment");
 
