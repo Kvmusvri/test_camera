@@ -298,7 +298,7 @@
                 let size = new Blob([photos[0]]).size;
                 alert(size);
 
-                let fileIds = uploadBlobsToTelegram(photos)
+                let fileIds = await uploadBlobsToTelegram(photos)
 
                 alert(fileIds);
         
