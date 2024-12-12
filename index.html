@@ -191,7 +191,7 @@
             canvas.toBlob((blob) => {
                 // Создаем URL для изображения и обновляем миниатюру
                 const url = URL.createObjectURL(blob);
-                photos.push(blob); // Сохраняем ссылку на изображение
+                photos.push(url); // Сохраняем ссылку на изображение
                 updateThumbnail(url); // Обновляем миниатюру
             }, "image/jpeg");
         });
@@ -223,8 +223,8 @@
         });
 
         const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Замените на токен вашего бота
-        //const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата, куда отправлять сообщение
-        const chatId = '7334856780';
+        const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата, куда отправлять сообщение
+        //const chatId = '7334856780';
         const photoUrl = 'https://i.pinimg.com/originals/cd/64/4d/cd644dbadeb1bdc70eef86e8d4df6ebe.png'; // URL фотографии, которую вы хотите отправить
 
         const base64String = photos[0];
@@ -271,8 +271,6 @@
                 
                 
                 //tg.sendData(JSON.stringify(photoData));
-
-                tg.sendData(photos[0]);
         
                 tg.close();
             } else {
