@@ -254,29 +254,39 @@
         
 
         // Отправка данных в Telegram
-        sendButton.addEventListener('click', () => {
-            if (photos.length > 0) {
-                let size = new Blob([photos[0]]).size;
-                alert(size);
+        // Отправка данных в Telegram
+sendButton.addEventListener('click', () => {
+    if (photos.length > 0) {
+        let size = new Blob([photos[0]]).size;
+        alert(size);
 
-                alert(photos[0]);
-        
-                photoData = {
-                    photos: photos
-                }
+        alert(photos[0]);
 
-                sendPhotoToTelegram();
-                
-                alert(chatId);
-                
-                
-                tg.sendData(JSON.stringify(photoData));
-        
-                tg.close();
-            } else {
-                alert('Нет фото для отправки.');
-            }
-        });
+        // Преобразуем Blob в строку Base64
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            // Получаем строку Base64 (удаляем префикс "data:image/jpeg;base64,")
+            const base64String = reader.result.split(',')[1];
+
+            // Формируем объект с Base64 строкой
+            const photoData = {
+                photo: base64String
+            };
+
+            // Отправляем данные через Telegram WebApp
+            tg.sendData(JSON.stringify(photoData)); // Отправляем JSON с Base64 строкой
+
+            tg.close();  // Закрываем приложение после отправки данных
+        };
+
+        // Читаем Blob как DataURL (Base64)
+        reader.readAsDataURL(photos[0]);
+
+    } else {
+        alert('Нет фото для отправки.');
+    }
+});
+
 
         startCamera("environment");
     </script>
