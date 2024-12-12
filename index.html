@@ -160,15 +160,7 @@
         let currentStream;
         let photos = [];
 
-        const BOT_TOKEN = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0'; // Замените на токен вашего бота
-        
-        Telegram.WebApp.ready();
-        const user = Telegram.WebApp.initDataUnsafe.user; // Информация о пользователе
-        const chatId = user.id; // Это ваш chat_id
-
         tg.expand();
-
-        alert(chatId);
 
         // Инициализация камеры
         async function startCamera(facingMode) {
