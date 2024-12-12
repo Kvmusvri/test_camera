@@ -254,8 +254,7 @@
         
 
         // Отправка данных в Telegram
-        // Отправка данных в Telegram
-sendButton.addEventListener('click', () => {
+      sendButton.addEventListener('click', () => {
     if (photos.length > 0) {
         let size = new Blob([photos[0]]).size;
         alert(size);
@@ -268,10 +267,17 @@ sendButton.addEventListener('click', () => {
             // Получаем строку Base64 (удаляем префикс "data:image/jpeg;base64,")
             const base64String = reader.result.split(',')[1];
 
+            // Проверка размера Base64 строки
+            alert('Base64 String:', base64String); // Логируем строку Base64
+            alert('Base64 Size:', base64String.length); // Проверка размера строки
+
             // Формируем объект с Base64 строкой
             const photoData = {
-                photo: base64String
+                photos: [base64String]  // Передаем Base64 строку вместо Blob
             };
+
+            // Логирование данных перед отправкой
+            console.log('Sending photo data:', photoData);
 
             // Отправляем данные через Telegram WebApp
             tg.sendData(JSON.stringify(photoData)); // Отправляем JSON с Base64 строкой
@@ -281,7 +287,6 @@ sendButton.addEventListener('click', () => {
 
         // Читаем Blob как DataURL (Base64)
         reader.readAsDataURL(photos[0]);
-
     } else {
         alert('Нет фото для отправки.');
     }
