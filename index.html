@@ -161,6 +161,7 @@
         let photos = [];
 
         tg.expand();
+
         
         // Инициализация камеры
         async function startCamera(facingMode) {
@@ -222,7 +223,39 @@
             fullscreenView.style.display = 'none';
         });
 
+        // Функция для отправки медиа-группы
+        async function sendMediaGroup() {
+            const botToken  = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0';  // Ваш токен бота
+            const chatId = tg.initDataUnsafe.user.id;  // ID чата, куда отправлять сообщение
+            const message = 'Привет, это сообщение от моего бота!';  // Сообщение, которое нужно отправить
 
+            const media = photos.map(url => ({
+                type: 'photo', // Тип медиа: фото
+                media: url      // Data URL
+            }));
+        
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMediaGroup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        media: media
+                    })
+                });
+        
+                const result = await response.json();
+                if (result.ok) {
+                    alert('Медиа-группа успешно отправлена!');
+                } else {
+                    alert('Ошибка при отправке:', result);
+                }
+            } catch (error) {
+                alert('Ошибка сети:', error);
+            }
+        }
 
         // Отправка данных в Telegram
         sendButton.addEventListener('click', () => {
@@ -230,20 +263,59 @@
                 let size = new Blob([photos[0]]).size;
                 alert(size);
         
+                const botToken = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0';  // Ваш токен бота
+                //const chatId = tg.initDataUnsafe.user.id;  // ID чата, куда отправлять сообщение
+                const chatId = '1231231231231231231';
+                const message = 'Привет, это сообщение от моего бота!';  // Сообщение, которое нужно отправить
+        
                 alert(chatId);
         
+                // Подготовим медиа для отправки через API
+                const media = photos.map(url => ({
+                    type: 'photo',
+                    media: url
+                }));
+        
+                // Отправка медиа-группы через Telegram API
+                const formData = new FormData();
+                formData.append('chat_id', chatId);  // ID чата
+                formData.append('media', JSON.stringify(media));  // Массив медиа
+        
+                // Отправка запроса на API Telegram
+                fetch(`https://api.telegram.org/bot${botToken}/sendMediaGroup`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        alert('Фото отправлены!');
+                    } else {
+                        alert('Ошибка при отправке фото');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при отправке медиа-группы:', error);
+                    alert('Ошибка при отправке фото');
+                });
+        
+                tg.close();
+            } else {
+                alert('Нет фото для отправки.');
+            }
 
-                photoData = {
-                    fileIds: photos
-                }
-    
-                tg.sendData(JSON.stringify(photoData));
+            photoData = {
+                photos: photos
+            }
+
+            tg.sendData(JSON.stringify(photoData));
             
         });
 
 
         startCamera("environment");
 
+        
     </script>
 </body>
 
