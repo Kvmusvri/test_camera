@@ -271,16 +271,42 @@
             alert('Base64 String:', base64String); // Логируем строку Base64
             alert('Base64 Size:', base64String.length); // Проверка размера строки
 
-            // Формируем объект с Base64 строкой
+            // Если строка слишком большая, сжимаем её
+            let compressedBase64 = base64String;
+            if (base64String.length > 100) {
+                // Преобразуем строку Base64 в бинарный массив
+                const binaryString = atob(base64String); // Декодируем Base64 в бинарный
+                const binaryArray = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    binaryArray[i] = binaryString.charCodeAt(i);
+                }
+
+                // Сжимаем бинарные данные
+                const compressedData = pako.gzip(binaryArray);
+
+                // Преобразуем сжатые данные обратно в Base64
+                compressedBase64 = btoa(String.fromCharCode.apply(null, compressedData));
+
+                // Если размер сжатой строки превышает 100 байт, урезаем её
+                if (compressedBase64.length > 100) {
+                    compressedBase64 = compressedBase64.substring(0, 100);
+                }
+            }
+
+            // Логируем сжатую строку
+            alert('Compressed Base64 String:', compressedBase64);
+            alert('Compressed Base64 Size:', compressedBase64.length);
+
+            // Формируем объект с сжатыми данными
             const photoData = {
-                photos: [base64String]  // Передаем Base64 строку вместо Blob
+                photos: [compressedBase64]  // Передаем сжатую Base64 строку
             };
 
             // Логирование данных перед отправкой
-            console.log('Sending photo data:', photoData);
+            console.log('Sending compressed photo data:', photoData);
 
             // Отправляем данные через Telegram WebApp
-            tg.sendData(JSON.stringify(photoData)); // Отправляем JSON с Base64 строкой
+            tg.sendData(JSON.stringify(photoData)); // Отправляем JSON с сжатыми данными
 
             tg.close();  // Закрываем приложение после отправки данных
         };
