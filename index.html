@@ -230,7 +230,7 @@
         const base64String = photos[0];
 
         async function sendPhotoToTelegram() {
-            const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+            const url = https://api.telegram.org/bot${botToken}/sendPhoto;
             const formData = new FormData();
             formData.append("photo", photoBlob, "photo.jpg");
         
@@ -241,7 +241,7 @@
                 });
         
                 if (!response.ok) {
-                    throw new Error(`Ошибка HTTP: ${response.status}`);
+                    throw new Error(Ошибка HTTP: ${response.status});
                 }
         
                 const result = await response.json();
@@ -254,73 +254,33 @@
         
 
         // Отправка данных в Telegram
-      sendButton.addEventListener('click', () => {
-    if (photos.length > 0) {
-        let size = new Blob([photos[0]]).size;
-        alert(size);
+        sendButton.addEventListener('click', () => {
+            if (photos.length > 0) {
+                let size = new Blob([photos[0]]).size;
+                alert(size);
 
-        alert(photos[0]);
-
-        // Преобразуем Blob в строку Base64
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            // Получаем строку Base64 (удаляем префикс "data:image/jpeg;base64,")
-            const base64String = reader.result.split(',')[1];
-
-            // Проверка размера Base64 строки
-            alert('Base64 String:', base64String); // Логируем строку Base64
-            alert('Base64 Size:', base64String.length); // Проверка размера строки
-
-            // Если строка слишком большая, сжимаем её
-            let compressedBase64 = base64String;
-            if (base64String.length > 100) {
-                // Преобразуем строку Base64 в бинарный массив
-                const binaryString = atob(base64String); // Декодируем Base64 в бинарный
-                const binaryArray = new Uint8Array(binaryString.length);
-                for (let i = 0; i < binaryString.length; i++) {
-                    binaryArray[i] = binaryString.charCodeAt(i);
+                alert(photos[0]);
+        
+                photoData = {
+                    photos: photos
                 }
 
-                // Сжимаем бинарные данные
-                const compressedData = pako.gzip(binaryArray);
-
-                // Преобразуем сжатые данные обратно в Base64
-                compressedBase64 = btoa(String.fromCharCode.apply(null, compressedData));
-
-                // Если размер сжатой строки превышает 100 байт, урезаем её
-                if (compressedBase64.length > 100) {
-                    compressedBase64 = compressedBase64.substring(0, 100);
-                }
+                sendPhotoToTelegram();
+                
+                alert(chatId);
+                
+                
+                tg.sendData(JSON.stringify(photoData));
+        
+                tg.close();
+            } else {
+                alert('Нет фото для отправки.');
             }
-
-            // Логируем сжатую строку
-            alert('Compressed Base64 String:', compressedBase64);
-            alert('Compressed Base64 Size:', compressedBase64.length);
-
-            // Формируем объект с сжатыми данными
-            const photoData = {
-                photos: [compressedBase64]  // Передаем сжатую Base64 строку
-            };
-
-            // Логирование данных перед отправкой
-            console.log('Sending compressed photo data:', photoData);
-
-            // Отправляем данные через Telegram WebApp
-            tg.sendData(JSON.stringify(photoData)); // Отправляем JSON с сжатыми данными
-
-            tg.close();  // Закрываем приложение после отправки данных
-        };
-
-        // Читаем Blob как DataURL (Base64)
-        reader.readAsDataURL(photos[0]);
-    } else {
-        alert('Нет фото для отправки.');
-    }
-});
-
+        });
 
         startCamera("environment");
     </script>
 </body>
 
 </html>
+
