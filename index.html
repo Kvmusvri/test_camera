@@ -239,7 +239,7 @@
                 //};
 
                 const token = '7821332528:AAG5jj-v_nO7FUPz9_3auHrSueIvl7tQfC0';  // Ваш токен бота
-                const chatId = tg.initDataUnsafe.first_name;  // ID чата, куда отправлять сообщение
+                const chatId = tg.initDataUnsafe.user.id;  // ID чата, куда отправлять сообщение
                 const message = 'Привет, это сообщение от моего бота!';  // Сообщение, которое нужно отправить
 
                 alert(chatId);
