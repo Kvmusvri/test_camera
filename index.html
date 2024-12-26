@@ -210,14 +210,15 @@
 
         // Открыть полный экран
         function openFullscreenView() {
-            slider.innerHTML = '';
-            photos.forEach(photo => {
+            slider.innerHTML = ''; // Очищаем слайдер
+            photos.forEach(photoBase64 => {
                 const img = document.createElement('img');
-                img.src = photo;
-                slider.appendChild(img);
+                img.src = `data:image/jpeg;base64,${photoBase64}`; // Создаем URL из base64
+                slider.appendChild(img); // Добавляем изображение в слайдер
             });
-            fullscreenView.style.display = 'flex';
+            fullscreenView.style.display = 'flex'; // Показываем полноэкранный вид
         }
+
 
         // Закрыть полный экран
         closeBtn.addEventListener('click', () => {
