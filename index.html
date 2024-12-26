@@ -187,14 +187,16 @@
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Конвертация изображения в base64
+            const base64Image = canvas.toDataURL("image/jpeg").split(",")[1]; // Получаем только данные base64 без префикса
+            photos.push(base64Image); // Сохраняем base64 строку в массив photos
+            
+            // Обновляем миниатюру
+            const url = `data:image/jpeg;base64,${base64Image}`;
+            updateThumbnail(url); // Передаём URL для отображения миниатюры
+});
 
-            canvas.toBlob((blob) => {
-                // Создаем URL для изображения и обновляем миниатюру
-                const url = URL.createObjectURL(blob);
-                photos.push(blob); // Сохраняем ссылку на изображение
-                updateThumbnail(url); // Обновляем миниатюру
-            }, "image/jpeg");
-        });
         
 
         // Обновление миниатюры
